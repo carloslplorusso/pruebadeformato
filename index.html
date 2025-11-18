@@ -11,9 +11,9 @@
         --primary-dark: #121212;  /* Negro Marca */
         --light-bg: #f3f4f6;      /* Fondo Pantalla */
         --white: #ffffff;         
-        --border-color: #e5e7eb; 
+        --border-color: #e5e7eb;  
         --correct-bg: #e6fcf5;
-        --correct-border: #22c55e; 
+        --correct-border: #22c55e;
         --correct-text: #15803d;
         --incorrect-bg: #fff5f5;
         --incorrect-border: #ef4444;
@@ -83,13 +83,30 @@
         font-size: 0.9em;
         font-weight: 400;
         z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 15px;
     }
-
+    .btn-stats-link {
+        background: none;
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 5px 10px;
+        font-size: 0.8em;
+        font-weight: 700;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+        text-decoration: none; /* Asegura que no tenga subrayado */
+    }
+    .btn-stats-link:hover {
+        background-color: rgba(252, 220, 17, 0.1);
+    }
+    
     /* --- VIEWS CONFIGURATION --- */
     
-    /* IMPORTANTE: Control de visibilidad inicial */
-    #welcome-view {
-        display: flex; /* Visible al inicio */
+    .view-container {
+        display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -97,22 +114,11 @@
         text-align: center;
         flex: 1;
     }
+    
+    #welcome-view { display: flex; } /* Visible al inicio */
+    #quiz-view { display: none; flex-direction: row; }
+    #results-view { display: none; }
 
-    #quiz-view {
-        display: none; /* Oculto al inicio */
-        flex-direction: row;
-        flex: 1;
-    }
-
-    #results-view {
-        display: none; /* Oculto al inicio */
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 60px 20px;
-        text-align: center;
-        flex: 1;
-    }
 
     /* --- WELCOME VIEW STYLES --- */
     .welcome-card {
@@ -415,6 +421,7 @@
         .scoreboard { flex-direction: column; align-items: flex-start; gap: 10px; }
         .header-center { position: static; transform: none; margin: 5px 0; display: inline-block; }
         .brand-header { flex-direction: column; }
+        .progress-indicator { gap: 8px; flex-direction: column; align-items: flex-end; }
     }
 </style>
 </head>
@@ -424,10 +431,13 @@
     <div class="brand-header">
         <span class="header-left">INBDE Pro</span>
         <span id="timer" class="header-center" style="display:none;">30:00</span>
-        <span class="progress-indicator header-right" id="progress-text">Welcome</span>
+        <span class="progress-indicator header-right" id="progress-text">
+            Welcome
+            <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>
+        </span>
     </div>
 
-    <div id="welcome-view">
+    <div id="welcome-view" class="view-container">
         <div class="welcome-card">
             <h1 class="welcome-title">INBDE Pro Method</h1>
             <p class="welcome-subtitle">Simulated Practice Examination</p>
@@ -497,7 +507,7 @@
         </div>
     </div>
 
-    <div id="results-view">
+    <div id="results-view" class="view-container">
         <div class="score-card">
             <h2>Assessment Complete</h2>
             <span class="score-number" id="final-score">0%</span>
@@ -512,6 +522,8 @@
         <h3>Review Answers</h3>
         <div class="review-list" id="review-list">
             </div>
+            
+        <a href="stats.html" class="btn-start" style="margin-top: 40px; font-size: 1.1em; padding: 12px 30px;">View Global Stats</a>
     </div>
 
     <div class="brand-footer">INBDE Pro</div>
@@ -529,298 +541,35 @@
     // ========================================================================
     // 1. CONFIGURATION
     // ========================================================================
-    // 👇👇👇 PEGA TU URL DE SCRIPT AQUI ABAJO 👇👇👇
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzN07vj15V3_H3K0-C4gT2X8N4_y5f9M2sQ1W8_L0p6d/exec"; 
-    // 👆👆👆 --------------------------------------- 👆👆👆
-
+    
     // =========================================
-    // 2. DATABASE OF 20 QUESTIONS
+    // 2. DATABASE OF 20 QUESTIONS (Mantenido el mismo para ahorrar espacio)
     // =========================================
     const questions = [
-        {
-            id: 1,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Male, 24 years old",
-                cc: "\"I am extremely nervous about getting this cavity filled.\"",
-                history: "History of dental anxiety. No systemic contraindications to sedation.",
-                findings: "Class I caries on tooth #30. Patient is currently receiving N2O/O2. Vitals are stable."
-            },
-            text: "A patient is undergoing a procedure with nitrous oxide and oxygen. They are relaxed, able to respond purposefully to verbal commands, and their airway reflexes are intact. Which level of sedation does this MOST LIKELY represent?",
-            options: ["Minimal Sedation (Anxiolysis)", "Moderate Sedation", "Deep Sedation", "General Anesthesia"],
-            correct: 0,
-            explanation: "The document lists minimal sedation, moderate sedation, deep sedation, and general anesthesia as levels of anxiety and pain control. Nitrous oxide/oxygen often produces minimal sedation, where the patient normally responds to verbal commands."
-        },
-        {
-            id: 2,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Female, 28 years old",
-                cc: "\"I have a bump on my gum that bleeds when I brush.\"",
-                history: "Patient is in the second trimester of pregnancy (22 weeks).",
-                findings: "Localized, pedunculated, erythematous mass on the interdental papilla between #8 and #9."
-            },
-            text: "A pregnant patient in her second trimester presents with a localized, round, red growth on the interdental papilla that bleeds easily. This lesion is MOST LIKELY a:",
-            options: ["Fibroma", "Pyogenic Granuloma (Granuloma Gravidarum)", "Peripheral Giant Cell Granuloma", "Papilloma"],
-            correct: 1,
-            explanation: "The document explicitly states that a 'pyogenic granuloma (aka. granuloma gravidarum) is a round growth... that may develop due to hormonal changes' during pregnancy."
-        },
-        {
-            id: 3,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Female, 32 years old",
-                cc: "\"I need a tooth extraction.\"",
-                history: "Patient is 34 weeks pregnant (Third Trimester).",
-                findings: "Non-restorable caries on tooth #30. Patient feels faint when lying flat."
-            },
-            text: "To prevent supine hypotensive syndrome in a pregnant patient during the third trimester, how should the patient be positioned in the dental chair?",
-            options: ["Completely supine", "Trendelenburg position", "Left lateral decubitus position", "Right lateral decubitus position"],
-            correct: 2,
-            explanation: "The document indicates that the 'Left lateral decubitus' position is used to relieve pressure on the inferior vena cava exerted by the uterus."
-        },
-        {
-            id: 4,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Female, 30 years old",
-                cc: "\"Is this medication safe for my baby?\"",
-                history: "First trimester of pregnancy.",
-                findings: "Patient requires medication for a systemic condition where the benefits outweigh the risks."
-            },
-            text: "Which FDA pregnancy category describes drugs for which there is positive evidence of human fetal risk based on adverse reaction data, but potential benefits may warrant use of the drug in pregnant women despite potential risks?",
-            options: ["Category A", "Category B", "Category C", "Category D"],
-            correct: 3,
-            explanation: "The table defining risk categories states that Category D indicates 'Human data indicating risk,' but may be used if benefits are acceptable despite the risk."
-        },
-        {
-            id: 5,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Female, 26 years old",
-                cc: "\"My face is swollen and throbbing.\"",
-                history: "18 weeks pregnant. No known drug allergies.",
-                findings: "Facial swelling originating from necrotic tooth #19. Systemic antibiotic therapy is indicated."
-            },
-            text: "A pregnant patient requires an antibiotic for an odontogenic infection. She has no known drug allergies. Which of the following is considered SAFEST to prescribe (Category B)?",
-            options: ["Doxycycline", "Amoxicillin", "Clarithromycin", "Tetracycline"],
-            correct: 1,
-            explanation: "Amoxicillin is listed as a Category B antibiotic, which is considered safe. Tetracyclines (including Doxycycline) are Category D, and Clarithromycin is Category C."
-        },
-        {
-            id: 6,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Male, 55 years old",
-                cc: "\"I've been feeling very tired lately.\"",
-                history: "History of anemia.",
-                findings: "Dentist is reviewing the patient's recent Complete Blood Count (CBC) results prior to surgery."
-            },
-            text: "Which component of a complete blood count (CBC) is specifically used to assess the variation in red blood cell size?",
-            options: ["MCV (Mean Corpuscular Volume)", "MCH (Mean Corpuscular Hemoglobin)", "MCHC (Mean Corpuscular Hemoglobin Concentration)", "RDW (Red Cell Distribution Width)"],
-            correct: 3,
-            explanation: "The erythrogram section states that 'RBC size variation' is measured by 'red cell distribution width or RDW'."
-        },
-        {
-            id: 7,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Female, 40 years old",
-                cc: "\"My gums look very pale.\"",
-                history: "Reports heavy menstrual cycles and fatigue.",
-                findings: "Pale oral mucosa. Hemogram shows Low Hb and Low MCV."
-            },
-            text: "A patient's hemogram reveals a low Hemoglobin and a low Mean Corpuscular Volume (MCV). Which of the following conditions is a MOST LIKELY differential diagnosis?",
-            options: ["Folic acid deficiency", "Vitamin B12 deficiency", "Iron Deficiency Anemia (IDA)", "Liver disease"],
-            correct: 2,
-            explanation: "The anemia flowchart shows that 'Low' MCV is associated with 'IDA' (Iron Deficiency Anemia), Thalassemia, Lead poisoning, and Chronic disease. Folic acid and B12 deficiencies cause high MCV."
-        },
-        {
-            id: 8,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "N/A (Board Review)",
-                cc: "N/A",
-                history: "Regulatory compliance review.",
-                findings: "Reviewing controlled substance classifications and prescribing limitations."
-            },
-            text: "A drug with a high potential for abuse, no currently accepted medical use in treatment in the United States, and a lack of accepted safety for use under medical supervision would be classified as:",
-            options: ["Schedule I", "Schedule II", "Schedule III", "Schedule IV"],
-            correct: 0,
-            explanation: "Schedule I drugs have 'High abuse potential with no accepted medical use,' such as heroin or LSD."
-        },
-        {
-            id: 9,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Male, 45 years old",
-                cc: "\"I am in severe pain after the surgery.\"",
-                history: "Recent complex extraction of impacted wisdom teeth.",
-                findings: "Patient requires a potent analgesic. Dentist is writing a prescription."
-            },
-            text: "Which of the following analgesics is classified as a Schedule II controlled substance?",
-            options: ["Acetaminophen with Codeine (Tylenol #3)", "Ibuprofen", "Oxycodone", "Tramadol"],
-            correct: 2,
-            explanation: "Oxycodone, morphine, and hydrocodone are listed as examples of Schedule II drugs. Tylenol with Codeine is listed under Schedule III, and Tramadol is Schedule IV."
-        },
-        {
-            id: 10,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Female, 22 years old",
-                cc: "\"Numb me up good, I hate pain.\"",
-                history: "No medical contraindications.",
-                findings: "Preparing for operative dentistry. Administering 2% Lidocaine."
-            },
-            text: "Local anesthetics exert their primary effect by:",
-            options: ["Blocking voltage-gated calcium channels", "Blocking voltage-gated sodium (Na+) channels", "Enhancing GABA receptor activity", "Inhibiting prostaglandin synthesis"],
-            correct: 1,
-            explanation: "The document explicitly states: 'Local anaesthetic agents suppress action potentials in excitable tissues by blocking voltage-gated Na+ channels'."
-        },
-        {
-            id: 11,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Male, 65 years old",
-                cc: "\"I'm here for my cleaning.\"",
-                history: "History of hyperlipidemia and coronary artery disease. Taking Atorvastatin.",
-                findings: "Intraoral exam is within normal limits. Reviewing medication list."
-            },
-            text: "Statins, used to lower LDL cholesterol, work by competitively inhibiting which enzyme?",
-            options: ["Angiotensin-converting enzyme (ACE)", "Cyclooxygenase (COX)", "HMG-CoA reductase", "Monoamine oxidase (MAO)"],
-            correct: 2,
-            explanation: "Statins work by 'competitively blocking the active site of... HMG-CoA reductase,' the rate-limiting enzyme in the mevalonate pathway."
-        },
-        {
-            id: 12,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Male, 25 years old",
-                cc: "\"My teeth are rotting out.\"",
-                history: "History of substance abuse (methamphetamines).",
-                findings: "Rampant caries (\"Meth mouth\"), xerostomia, and bruxism."
-            },
-            text: "Regular use of amphetamines can lead to several adverse oral and systemic effects. Which of the following is NOT typically associated with amphetamine use as listed in the document?",
-            options: ["Reduced appetite and extreme weight loss", "Dry mouth (Xerostomia)", "Decreased heart rate (Bradycardia)", "Dental problems (\"Meth mouth\")"],
-            correct: 2,
-            explanation: "Amphetamines are stimulants that 'speed up the messages' and when combined with other substances can increase heart rate. Bradycardia (slow heart rate) is not a typical effect; the list includes reduced appetite, dry mouth, and dental problems."
-        },
-        {
-            id: 13,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Female, 45 years old",
-                cc: "\"I get very nauseous during dental treatment.\"",
-                history: "Severe gag reflex and motion sickness.",
-                findings: "Dentist considers adjunctive medication to manage nausea/gagging."
-            },
-            text: "Scopolamine is an anticholinergic drug primarily indicated for the prevention of:",
-            options: ["Hypertension", "Seizures", "Nausea and vomiting associated with motion sickness", "Bacterial infections"],
-            correct: 2,
-            explanation: "Scopolamine is indicated for 'the treatment of nausea and vomiting associated with motion sickness and postoperative nausea and vomiting'."
-        },
-        {
-            id: 14,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Male, 19 years old",
-                cc: "None (Emergency situation).",
-                history: "No significant medical history. High anxiety.",
-                findings: "Patient became pale and lost consciousness immediately after local anesthetic injection. Pulse is weak but present."
-            },
-            text: "The MOST COMMON medical emergency in the dental office is syncope. What is the immediate management step for a patient experiencing vasovagal syncope?",
-            options: ["Administer epinephrine immediately", "Place patient in a supine position with legs elevated", "Administer nitroglycerin sublingually", "Have the patient breathe into a paper bag"],
-            correct: 1,
-            explanation: "The management for syncope is listed as 'Horizontal position with legs elevated' (supine) to increase venous return to the brain."
-        },
-        {
-            id: 15,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Male, 68 years old",
-                cc: "\"I have a tightness in my chest.\"",
-                history: "History of stable angina.",
-                findings: "Patient develops chest pain during the procedure. Conscious and responsive."
-            },
-            text: "A patient with a history of stable angina experiences chest pain during a dental procedure. The patient remains conscious. After stopping the procedure and positioning the patient, what is the first-line drug to administer?",
-            options: ["Aspirin 325 mg chewed", "Nitroglycerin (0.4 mg) sublingually", "Epinephrine IM", "Albuterol inhaler"],
-            correct: 1,
-            explanation: "The emergency management for angina includes administering 'nitroglycerin (0.3 or 0.4 mg) sublingually' as the initial pharmacological intervention."
-        },
-        {
-            id: 16,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Male, 62 years old",
-                cc: "\"I need implants.\"",
-                history: "Patient suffered a Myocardial Infarction (Heart Attack) 2 months ago.",
-                findings: "Patient is requesting elective complex surgery."
-            },
-            text: "According to the provided text, what is the recommended waiting period for elective complex dental procedures after a patient has had a Myocardial Infarction (MI)?",
-            options: ["6 weeks", "3 months", "6 months", "12 months"],
-            correct: 2,
-            explanation: "The table indicates that within the 'past 6 months' of an MI, a patient is 'At significant risk'. The text advises that 'Complex prosthetic and surgical procedures should not be undertaken' during this high-risk period."
-        },
-        {
-            id: 17,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Female, 78 years old",
-                cc: "\"I get out of breath just sitting here.\"",
-                history: "Congestive Heart Failure (CHF).",
-                findings: "Patient exhibits dyspnea at rest and swollen ankles."
-            },
-            text: "A patient with New York Heart Association (NYHA) Class IV Congestive Heart Failure (CHF) would MOST LIKELY exhibit which of the following?",
-            options: ["No limitation of physical activity", "Symptoms only with strenuous exertion", "Severe compromise of activity; inability to walk up one flight of stairs", "Symptoms only when supine"],
-            correct: 2,
-            explanation: "NYHA Class IV is described as 'Severe CHF' with 'Severe compromise of activity; cannot walk up one flight of stairs' and symptoms often present at rest."
-        },
-        {
-            id: 18,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Male, 14 years old",
-                cc: "\"I feel dizzy and hungry.\"",
-                history: "Type 1 Diabetes Mellitus. Took insulin but skipped breakfast.",
-                findings: "Patient is sweating (diaphoretic), pale, and irritable."
-            },
-            text: "Which of the following is a classic sign or symptom of hypoglycemia (low blood sugar)?",
-            options: ["Increased thirst (Polydipsia)", "Frequent urination (Polyuria)", "Sweating (Diaphoresis) and irritability", "Fruity breath odor"],
-            correct: 2,
-            explanation: "The chart for hypoglycemia lists 'Sweating,' 'Irritability,' 'Pallor,' 'Hunger,' and 'Lack of coordination'. Increased thirst and frequent urination are signs of hyperglycemia."
-        },
-        {
-            id: 19,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Female, 10 years old",
-                cc: "\"I can't breathe.\"",
-                history: "History of asthma.",
-                findings: "Audible wheezing and dyspnea during dental prophylaxis."
-            },
-            text: "A patient is having an acute asthma attack in the dental chair. They are wheezing and short of breath. What is the FIRST pharmacological intervention?",
-            options: ["Administer oxygen only", "Administer their short-acting beta-2 agonist (e.g., Albuterol) inhaler", "Inject Epinephrine IM immediately", "Administer IV corticosteroids"],
-            correct: 1,
-            explanation: "Emergency management of asthma includes allowing the patient to 'use his/her own inhaler' or using an Albuterol inhaler (Short-acting Beta-2 agonist) from the emergency kit."
-        },
-        {
-            id: 20,
-            images: { xray: null, photo: null },
-            sidebar: {
-                patient: "Female, 35 years old",
-                cc: "\"My throat feels like it's closing up.\"",
-                history: "No known allergies (previously).",
-                findings: "Minutes after taking Amoxicillin, patient develops lip swelling, difficulty breathing, and hypotension."
-            },
-            text: "What is the critical, first-line drug that must be administered immediately for a patient experiencing anaphylactic shock?",
-            options: ["Diphenhydramine (Benadryl) orally", "Albuterol inhaler", "Epinephrine (0.3 mg 1:1000) IM", "High-flow oxygen"],
-            correct: 2,
-            explanation: "The slide for anaphylactic shock highlights 'Epinephrine (0.3mg 1:1000) IM' as a primary intervention. While antihistamines and oxygen are also used, epinephrine is the definitive, life-saving treatment."
-        }
+        { id: 1, images: { xray: null, photo: null }, sidebar: { patient: "Male, 24 years old", cc: "\"I am extremely nervous about getting this cavity filled.\"", history: "History of dental anxiety. No systemic contraindications to sedation.", findings: "Class I caries on tooth #30. Patient is currently receiving N2O/O2. Vitals are stable." }, text: "A patient is undergoing a procedure with nitrous oxide and oxygen. They are relaxed, able to respond purposefully to verbal commands, and their airway reflexes are intact. Which level of sedation does this MOST LIKELY represent?", options: ["Minimal Sedation (Anxiolysis)", "Moderate Sedation", "Deep Sedation", "General Anesthesia"], correct: 0, explanation: "The document lists minimal sedation, moderate sedation, deep sedation, and general anesthesia as levels of anxiety and pain control. Nitrous oxide/oxygen often produces minimal sedation, where the patient normally responds to verbal commands." },
+        { id: 2, images: { xray: null, photo: null }, sidebar: { patient: "Female, 28 years old", cc: "\"I have a bump on my gum that bleeds when I brush.\"", history: "Patient is in the second trimester of pregnancy (22 weeks).", findings: "Localized, pedunculated, erythematous mass on the interdental papilla between #8 and #9." }, text: "A pregnant patient in her second trimester presents with a localized, round, red growth on the interdental papilla that bleeds easily. This lesion is MOST LIKELY a:", options: ["Fibroma", "Pyogenic Granuloma (Granuloma Gravidarum)", "Peripheral Giant Cell Granuloma", "Papilloma"], correct: 1, explanation: "The document explicitly states that a 'pyogenic granuloma (aka. granuloma gravidarum) is a round growth... that may develop due to hormonal changes' during pregnancy." },
+        { id: 3, images: { xray: null, photo: null }, sidebar: { patient: "Female, 32 years old", cc: "\"I need a tooth extraction.\"", history: "Patient is 34 weeks pregnant (Third Trimester).", findings: "Non-restorable caries on tooth #30. Patient feels faint when lying flat." }, text: "To prevent supine hypotensive syndrome in a pregnant patient during the third trimester, how should the patient be positioned in the dental chair?", options: ["Completely supine", "Trendelenburg position", "Left lateral decubitus position", "Right lateral decubitus position"], correct: 2, explanation: "The document indicates that the 'Left lateral decubitus' position is used to relieve pressure on the inferior vena cava exerted by the uterus." },
+        { id: 4, images: { xray: null, photo: null }, sidebar: { patient: "Female, 30 years old", cc: "\"Is this medication safe for my baby?\"", history: "First trimester of pregnancy.", findings: "Patient requires medication for a systemic condition where the benefits outweigh the risks." }, text: "Which FDA pregnancy category describes drugs for which there is positive evidence of human fetal risk based on adverse reaction data, but potential benefits may warrant use of the drug in pregnant women despite potential risks?", options: ["Category A", "Category B", "Category C", "Category D"], correct: 3, explanation: "The table defining risk categories states that Category D indicates 'Human data indicating risk,' but may be used if benefits are acceptable despite the risk." },
+        { id: 5, images: { xray: null, photo: null }, sidebar: { patient: "Female, 26 years old", cc: "\"My face is swollen and throbbing.\"", history: "18 weeks pregnant. No known drug allergies.", findings: "Facial swelling originating from necrotic tooth #19. Systemic antibiotic therapy is indicated." }, text: "A pregnant patient requires an antibiotic for an odontogenic infection. She has no known drug allergies. Which of the following is considered SAFEST to prescribe (Category B)?", options: ["Doxycycline", "Amoxicillin", "Clarithromycin", "Tetracycline"], correct: 1, explanation: "Amoxicillin is listed as a Category B antibiotic, which is considered safe. Tetracyclines (including Doxycycline) are Category D, and Clarithromycin is Category C." },
+        { id: 6, images: { xray: null, photo: null }, sidebar: { patient: "Male, 55 years old", cc: "\"I've been feeling very tired lately.\"", history: "History of anemia.", findings: "Dentist is reviewing the patient's recent Complete Blood Count (CBC) results prior to surgery." }, text: "Which component of a complete blood count (CBC) is specifically used to assess the variation in red blood cell size?", options: ["MCV (Mean Corpuscular Volume)", "MCH (Mean Corpuscular Hemoglobin)", "MCHC (Mean Corpuscular Hemoglobin Concentration)", "RDW (Red Cell Distribution Width)"], correct: 3, explanation: "The erythrogram section states that 'RBC size variation' is measured by 'red cell distribution width or RDW'." },
+        { id: 7, images: { xray: null, photo: null }, sidebar: { patient: "Female, 40 years old", cc: "\"My gums look very pale.\"", history: "Reports heavy menstrual cycles and fatigue.", findings: "Pale oral mucosa. Hemogram shows Low Hb and Low MCV." }, text: "A patient's hemogram reveals a low Hemoglobin and a low Mean Corpuscular Volume (MCV). Which of the following conditions is a MOST LIKELY differential diagnosis?", options: ["Folic acid deficiency", "Vitamin B12 deficiency", "Iron Deficiency Anemia (IDA)", "Liver disease"], correct: 2, explanation: "The anemia flowchart shows that 'Low' MCV is associated with 'IDA' (Iron Deficiency Anemia), Thalassemia, Lead poisoning, and Chronic disease. Folic acid and B12 deficiencies cause high MCV." },
+        { id: 8, images: { xray: null, photo: null }, sidebar: { patient: "N/A (Board Review)", cc: "N/A", history: "Regulatory compliance review.", findings: "Reviewing controlled substance classifications and prescribing limitations." }, text: "A drug with a high potential for abuse, no currently accepted medical use in treatment in the United States, and a lack of accepted safety for use under medical supervision would be classified as:", options: ["Schedule I", "Schedule II", "Schedule III", "Schedule IV"], correct: 0, explanation: "Schedule I drugs have 'High abuse potential with no accepted medical use,' such as heroin or LSD." },
+        { id: 9, images: { xray: null, photo: null }, sidebar: { patient: "Male, 45 years old", cc: "\"I am in severe pain after the surgery.\"", history: "Recent complex extraction of impacted wisdom teeth.", findings: "Patient requires a potent analgesic. Dentist is writing a prescription." }, text: "Which of the following analgesics is classified as a Schedule II controlled substance?", options: ["Acetaminophen with Codeine (Tylenol #3)", "Ibuprofen", "Oxycodone", "Tramadol"], correct: 2, explanation: "Oxycodone, morphine, and hydrocodone are listed as examples of Schedule II drugs. Tylenol with Codeine is listed under Schedule III, and Tramadol is Schedule IV." },
+        { id: 10, images: { xray: null, photo: null }, sidebar: { patient: "Female, 22 years old", cc: "\"Numb me up good, I hate pain.\"", history: "No medical contraindications.", findings: "Preparing for operative dentistry. Administering 2% Lidocaine." }, text: "Local anesthetics exert their primary effect by:", options: ["Blocking voltage-gated calcium channels", "Blocking voltage-gated sodium (Na+) channels", "Enhancing GABA receptor activity", "Inhibiting prostaglandin synthesis"], correct: 1, explanation: "The document explicitly states: 'Local anaesthetic agents suppress action potentials in excitable tissues by blocking voltage-gated Na+ channels'." },
+        { id: 11, images: { xray: null, photo: null }, sidebar: { patient: "Male, 65 years old", cc: "\"I'm here for my cleaning.\"", history: "History of hyperlipidemia and coronary artery disease. Taking Atorvastatin.", findings: "Intraoral exam is within normal limits. Reviewing medication list." }, text: "Statins, used to lower LDL cholesterol, work by competitively inhibiting which enzyme?", options: ["Angiotensin-converting enzyme (ACE)", "Cyclooxygenase (COX)", "HMG-CoA reductase", "Monoamine oxidase (MAO)"], correct: 2, explanation: "Statins work by 'competitively blocking the active site of... HMG-CoA reductase,' the rate-limiting enzyme in the mevalonate pathway." },
+        { id: 12, images: { xray: null, photo: null }, sidebar: { patient: "Male, 25 years old", cc: "\"My teeth are rotting out.\"", history: "History of substance abuse (methamphetamines).", findings: "Rampant caries (\"Meth mouth\"), xerostomia, and bruxism." }, text: "Regular use of amphetamines can lead to several adverse oral and systemic effects. Which of the following is NOT typically associated with amphetamine use as listed in the document?", options: ["Reduced appetite and extreme weight loss", "Dry mouth (Xerostomia)", "Decreased heart rate (Bradycardia)", "Dental problems (\"Meth mouth\")"], correct: 2, explanation: "Amphetamines are stimulants that 'speed up the messages' and when combined with other substances can increase heart rate. Bradycardia (slow heart rate) is not a typical effect; the list includes reduced appetite, dry mouth, and dental problems." },
+        { id: 13, images: { xray: null, photo: null }, sidebar: { patient: "Female, 45 years old", cc: "\"I get very nauseous during dental treatment.\"", history: "Severe gag reflex and motion sickness.", findings: "Dentist considers adjunctive medication to manage nausea/gagging." }, text: "Scopolamine is an anticholinergic drug primarily indicated for the prevention of:", options: ["Hypertension", "Seizures", "Nausea and vomiting associated with motion sickness", "Bacterial infections"], correct: 2, explanation: "Scopolamine is indicated for 'the treatment of nausea and vomiting associated with motion sickness and postoperative nausea and vomiting'." },
+        { id: 14, images: { xray: null, photo: null }, sidebar: { patient: "Male, 19 years old", cc: "None (Emergency situation).", history: "No significant medical history. High anxiety.", findings: "Patient became pale and lost consciousness immediately after local anesthetic injection. Pulse is weak but present." }, text: "The MOST COMMON medical emergency in the dental office is syncope. What is the immediate management step for a patient experiencing vasovagal syncope?", options: ["Administer epinephrine immediately", "Place patient in a supine position with legs elevated", "Administer nitroglycerin sublingually", "Have the patient breathe into a paper bag"], correct: 1, explanation: "The management for syncope is listed as 'Horizontal position with legs elevated' (supine) to increase venous return to the brain." },
+        { id: 15, images: { xray: null, photo: null }, sidebar: { patient: "Male, 68 years old", cc: "\"I have a tightness in my chest.\"", history: "History of stable angina.", findings: "Patient develops chest pain during the procedure. Conscious and responsive." }, text: "A patient with a history of stable angina experiences chest pain during a dental procedure. The patient remains conscious. After stopping the procedure and positioning the patient, what is the first-line drug to administer?", options: ["Aspirin 325 mg chewed", "Nitroglycerin (0.4 mg) sublingually", "Epinephrine IM", "Albuterol inhaler"], correct: 1, explanation: "The emergency management for angina includes administering 'nitroglycerin (0.3 or 0.4 mg) sublingually' as the initial pharmacological intervention." },
+        { id: 16, images: { xray: null, photo: null }, sidebar: { patient: "Male, 62 years old", cc: "\"I need implants.\"", history: "Patient suffered a Myocardial Infarction (Heart Attack) 2 months ago.", findings: "Patient is requesting elective complex surgery." }, text: "According to the provided text, what is the recommended waiting period for elective complex dental procedures after a patient has had a Myocardial Infarction (MI)?", options: ["6 weeks", "3 months", "6 months", "12 months"], correct: 2, explanation: "The table indicates that within the 'past 6 months' of an MI, a patient is 'At significant risk'. The text advises that 'Complex prosthetic and surgical procedures should not be undertaken' during this high-risk period." },
+        { id: 17, images: { xray: null, photo: null }, sidebar: { patient: "Female, 78 years old", cc: "\"I get out of breath just sitting here.\"", history: "Congestive Heart Failure (CHF).", findings: "Patient exhibits dyspnea at rest and swollen ankles." }, text: "A patient with New York Heart Association (NYHA) Class IV Congestive Heart Failure (CHF) would MOST LIKELY exhibit which of the following?", options: ["No limitation of physical activity", "Symptoms only with strenuous exertion", "Severe compromise of activity; inability to walk up one flight of stairs", "Symptoms only when supine"], correct: 2, explanation: "NYHA Class IV is described as 'Severe CHF' with 'Severe compromise of activity; cannot walk up one flight of stairs' and symptoms often present at rest." },
+        { id: 18, images: { xray: null, photo: null }, sidebar: { patient: "Male, 14 years old", cc: "\"I feel dizzy and hungry.\"", history: "Type 1 Diabetes Mellitus. Took insulin but skipped breakfast.", findings: "Patient is sweating (diaphoretic), pale, and irritable." }, text: "Which of the following is a classic sign or symptom of hypoglycemia (low blood sugar)?", options: ["Increased thirst (Polydipsia)", "Frequent urination (Polyuria)", "Sweating (Diaphoresis) and irritability", "Fruity breath odor"], correct: 2, explanation: "The chart for hypoglycemia lists 'Sweating,' 'Irritability,' 'Pallor,' 'Hunger,' and 'Lack of coordination'. Increased thirst and frequent urination are signs of hyperglycemia." },
+        { id: 19, images: { xray: null, photo: null }, sidebar: { patient: "Female, 10 years old", cc: "\"I can't breathe.\"", history: "History of asthma.", findings: "Audible wheezing and dyspnea during dental prophylaxis." }, text: "A patient is having an acute asthma attack in the dental chair. They are wheezing and short of breath. What is the FIRST pharmacological intervention?", options: ["Administer oxygen only", "Administer their short-acting beta-2 agonist (e.g., Albuterol) inhaler", "Inject Epinephrine IM immediately", "Administer IV corticosteroids"], correct: 1, explanation: "Emergency management of asthma includes allowing the patient to 'use his/her own inhaler' or using an Albuterol inhaler (Short-acting Beta-2 agonist) from the emergency kit." },
+        { id: 20, images: { xray: null, photo: null }, sidebar: { patient: "Female, 35 years old", cc: "\"My throat feels like it's closing up.\"", history: "No known allergies (previously).", findings: "Minutes after taking Amoxicillin, patient develops lip swelling, difficulty breathing, and hypotension." }, text: "What is the critical, first-line drug that must be administered immediately for a patient experiencing anaphylactic shock?", options: ["Diphenhydramine (Benadryl) orally", "Albuterol inhaler", "Epinephrine (0.3 mg 1:1000) IM", "High-flow oxygen"], correct: 2, explanation: "The slide for anaphylactic shock highlights 'Epinephrine (0.3mg 1:1000) IM' as a primary intervention. While antihistamines and oxygen are also used, epinephrine is the definitive, life-saving treatment." }
     ];
-
     // =========================================
-    // LOGIC VARIABLES
+    // LÓGICA (Funciones de navegación y Quiz)
     // =========================================
     let currentQuestionIndex = 0;
     let userScore = 0;
@@ -830,37 +579,42 @@
     let userAnswers = []; 
     let questionStartTime;
     let timerInterval;
-    let totalTime = 30 * 60; // 30 minutes in seconds
+    let totalTime = 30 * 60; 
 
-    // --- START QUIZ FUNCTION ---
-    function startQuiz() {
+    function showView(viewId) {
         document.getElementById('welcome-view').style.display = 'none';
-        document.getElementById('quiz-view').style.display = 'flex';
-        document.getElementById('timer').style.display = 'inline-block'; // Show timer
-        
+        document.getElementById('quiz-view').style.display = 'none';
+        document.getElementById('results-view').style.display = 'none';
+
+        const displayStyle = (viewId === 'quiz-view') ? 'flex' : 'flex';
+        document.getElementById(viewId).style.display = displayStyle;
+
+        document.getElementById('progress-text').innerHTML = 
+            (viewId === 'welcome-view') ? `Welcome <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>` :
+            (viewId === 'results-view') ? `Results <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>` : 
+            `Question ${currentQuestionIndex + 1} of ${questions.length} <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>`;
+
+        document.getElementById('timer').style.display = (viewId === 'quiz-view') ? 'inline-block' : 'none';
+    }
+
+    function startQuiz() {
+        showView('quiz-view');
         loadQuestion();
         startTimer();
     }
-
-    // --- TIMER LOGIC ---
+    
     function startTimer() {
+        if (timerInterval) { clearInterval(timerInterval); }
         const timerDisplay = document.getElementById('timer');
         
         function updateTimer() {
             const minutes = Math.floor(totalTime / 60);
             let seconds = totalTime % 60;
-            
             seconds = seconds < 10 ? '0' + seconds : seconds;
             timerDisplay.innerText = `${minutes}:${seconds}`;
             
-            if (totalTime <= 0) {
-                clearInterval(timerInterval);
-                showResults();
-            } else {
-                totalTime--;
-            }
+            if (totalTime <= 0) { clearInterval(timerInterval); showResults(); } else { totalTime--; }
         }
-        
         updateTimer(); 
         timerInterval = setInterval(updateTimer, 1000);
     }
@@ -868,9 +622,8 @@
     function loadQuestion() {
         const q = questions[currentQuestionIndex];
         questionStartTime = new Date();
-
-        document.getElementById('progress-text').innerText = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
-
+        // ... (El resto de loadQuestion se mantiene igual)
+        document.getElementById('progress-text').innerHTML = `Question ${currentQuestionIndex + 1} of ${questions.length} <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>`;
         document.getElementById('sidebar-patient').innerText = q.sidebar.patient;
         document.getElementById('sidebar-cc').innerText = q.sidebar.cc;
         document.getElementById('sidebar-history').innerText = q.sidebar.history;
@@ -878,28 +631,12 @@
         
         const btnXray = document.getElementById('btn-xray');
         const btnPhoto = document.getElementById('btn-photo');
-
-        if (q.images && q.images.xray) {
-            btnXray.classList.remove('disabled-btn');
-            btnXray.disabled = false;
-        } else {
-            btnXray.classList.add('disabled-btn');
-            btnXray.disabled = true;
-        }
-
-        if (q.images && q.images.photo) {
-            btnPhoto.classList.remove('disabled-btn');
-            btnPhoto.disabled = false;
-        } else {
-            btnPhoto.classList.add('disabled-btn');
-            btnPhoto.disabled = true;
-        }
+        if (q.images && q.images.xray) { btnXray.classList.remove('disabled-btn'); btnXray.disabled = false; } else { btnXray.classList.add('disabled-btn'); btnXray.disabled = true; }
+        if (q.images && q.images.photo) { btnPhoto.classList.remove('disabled-btn'); btnPhoto.disabled = false; } else { btnPhoto.classList.add('disabled-btn'); btnPhoto.disabled = true; }
 
         document.getElementById('question-text').innerText = q.text;
-        
         const optionsContainer = document.getElementById('options-container');
         optionsContainer.innerHTML = ''; 
-        
         const feedbackDisplay = document.getElementById('feedbackDisplay');
         feedbackDisplay.style.display = 'none';
 
@@ -907,41 +644,31 @@
             const div = document.createElement('div');
             div.className = 'option';
             div.onclick = () => checkAnswer(div, index);
-            
             const circle = document.createElement('div');
             circle.className = 'option-circle';
-            
             const textSpan = document.createElement('span');
-            textSpan.innerText = String.fromCharCode(65 + index) + ". " + optText; 
-
+            textSpan.innerText = String.fromCharCode(65 + index) + ". " + optText;  
             div.appendChild(circle);
             div.appendChild(textSpan);
             optionsContainer.appendChild(div);
         });
-
         document.getElementById('btn-next').style.display = 'none';
     }
+
 
     function checkAnswer(element, selectedIndex) {
         if (document.querySelectorAll('.option.disabled').length > 0) return;
 
         const endTime = new Date();
         const timeTaken = (endTime - questionStartTime) / 1000; 
-
         const q = questions[currentQuestionIndex];
         const allOptions = document.querySelectorAll('.option');
-        
         allOptions.forEach(opt => opt.classList.add('disabled'));
-
         const isCorrect = (selectedIndex === q.correct);
         
-        userAnswers.push({
-            questionIndex: currentQuestionIndex,
-            selected: selectedIndex,
-            isCorrect: isCorrect
-        });
-
+        userAnswers.push({ questionIndex: currentQuestionIndex, selected: selectedIndex, isCorrect: isCorrect });
         answeredCount++;
+
         if (isCorrect) {
             correctCount++;
             userScore++;
@@ -951,7 +678,6 @@
             incorrectCount++;
             element.classList.add('wrong-answer');
             element.querySelector('.option-circle').innerHTML = '✕';
-            
             const correctEl = allOptions[q.correct];
             correctEl.classList.add('correct-answer');
             correctEl.querySelector('.option-circle').innerHTML = '✓';
@@ -983,70 +709,55 @@
 
     function showResults() {
         clearInterval(timerInterval);
+        showView('results-view'); 
         
-        document.getElementById('quiz-view').style.display = 'none';
-        document.getElementById('results-view').style.display = 'flex';
-        document.getElementById('progress-text').innerText = "Results";
-        document.getElementById('timer').style.display = 'none';
-
         const percentage = Math.round((userScore / questions.length) * 100);
         document.getElementById('final-score').innerText = percentage + "%";
         document.getElementById('score-text').innerText = `You answered ${userScore} out of ${questions.length} correctly.`;
 
-        // --- CALCULATE FINAL TIME ---
         const totalSecondsAllowed = 30 * 60;
         const secondsSpent = totalSecondsAllowed - totalTime;
         const m = Math.floor(secondsSpent / 60);
         const s = secondsSpent % 60;
         const timeString = `${m}m ${s}s`;
-        
-        // Update black box time
         document.getElementById('final-time-value').innerText = timeString;
 
-        // --- SEND DATA TO SHEETS ---
+        // --- ENVIAR DATOS A GOOGLE SHEETS (IMPORTANTE) ---
         sendDataToSheet(percentage, timeString);
 
         const listContainer = document.getElementById('review-list');
-        
+        listContainer.innerHTML = '';
         userAnswers.forEach((ans, i) => {
             const q = questions[ans.questionIndex];
             const item = document.createElement('div');
             item.className = 'review-item';
-
             const badgeClass = ans.isCorrect ? 'correct' : 'incorrect';
             const badgeText = ans.isCorrect ? 'Correct' : 'Incorrect';
-
             item.innerHTML = `
-                <div class="review-header">
-                    <span class="badge ${badgeClass}">${badgeText}</span>
-                </div>
+                <div class="review-header"><span class="badge ${badgeClass}">${badgeText}</span></div>
                 <div class="review-question">${i + 1}. ${q.text}</div>
-                <div style="font-size: 0.9em; color: #555; margin-bottom: 10px;">
-                    Your Answer: <strong>${q.options[ans.selected]}</strong> <br>
-                    Correct Answer: <strong>${q.options[q.correct]}</strong>
-                </div>
+                <div style="font-size: 0.9em; color: #555; margin-bottom: 10px;">Your Answer: <strong>${q.options[ans.selected]}</strong> <br>Correct Answer: <strong>${q.options[q.correct]}</strong></div>
                 <button class="btn-explain" onclick="toggleExplanation(${i})">Explanation</button>
-                <div class="explanation-box" id="explain-${i}">
-                    <strong>Rationale:</strong><br>
-                    ${q.explanation}
-                </div>
+                <div class="explanation-box" id="explain-${i}"><strong>Rationale:</strong><br>${q.explanation}</div>
             `;
             listContainer.appendChild(item);
         });
+
+        // Reset quiz state for next run
+        currentQuestionIndex = 0; userScore = 0; answeredCount = 0; correctCount = 0; incorrectCount = 0; userAnswers = []; totalTime = 30 * 60; 
     }
 
     function sendDataToSheet(percentage, formattedTime) {
-        if(GOOGLE_SCRIPT_URL.includes("PEGAR_AQUI")) {
-            console.warn("Google Script URL not set.");
-            return;
-        }
+        if(!GOOGLE_SCRIPT_URL) { console.warn("Google Script URL is not set."); return; }
 
         const dataToSend = {
+            action: 'postResults', 
+            timestamp: new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }),
             score: percentage,
             correct: userScore,
             total: questions.length,
             timeSpent: formattedTime, 
-            details: userAnswers.map(a => `Q${a.questionIndex+1}: ${a.isCorrect ? 'OK' : 'Fail'}`)
+            details: userAnswers.map(a => `Q${a.questionIndex+1}: ${a.isCorrect ? 'OK' : 'Fail'}`).join(', ')
         };
 
         fetch(GOOGLE_SCRIPT_URL, {
@@ -1059,37 +770,24 @@
 
     function toggleExplanation(index) {
         const box = document.getElementById(`explain-${index}`);
-        if (box.style.display === 'block') {
-            box.style.display = 'none';
-        } else {
-            box.style.display = 'block';
-        }
+        if (box.style.display === 'block') { box.style.display = 'none'; } else { box.style.display = 'block'; }
     }
 
-    // --- IMAGE HANDLING ---
+    // ... (Funciones openImage y closeModal se mantienen iguales)
     function openImage(type) {
         const q = questions[currentQuestionIndex];
         if (!q.images || !q.images[type]) return;
-
         const modal = document.getElementById('image-modal');
         const modalImg = document.getElementById('modal-img');
         const caption = document.getElementById('modal-caption');
-
         modal.style.display = "flex";
         modalImg.src = q.images[type]; 
         caption.innerText = type === 'xray' ? "Radiographic Finding" : "Clinical Photograph";
     }
 
-    function closeModal() {
-        document.getElementById('image-modal').style.display = "none";
-    }
-
-    document.addEventListener('keydown', function(event) {
-        if (event.key === "Escape") {
-            closeModal();
-        }
-    });
-
+    function closeModal() { document.getElementById('image-modal').style.display = "none"; }
+    document.addEventListener('keydown', function(event) { if (event.key === "Escape") { closeModal(); } });
+    window.onload = function() { showView('welcome-view'); };
 </script>
 
 </body>
