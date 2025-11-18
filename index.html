@@ -86,9 +86,8 @@
     }
 
     /* --- VIEWS CONFIGURATION --- */
-    
-    /* Clase común para centrar contenido en pantallas completas */
-    .centered-view {
+    #welcome-view, #results-view {
+        display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -97,19 +96,10 @@
         flex: 1;
     }
 
-    /* ESTADOS INICIALES DE VISIBILIDAD */
-    #welcome-view {
-        display: flex; /* Visible al inicio */
-    }
-
     #quiz-view {
-        display: none; /* Oculto al inicio */
+        display: none; /* Hidden initially */
         flex-direction: row;
         flex: 1;
-    }
-
-    #results-view {
-        display: none; /* Oculto al inicio */
     }
 
     /* --- WELCOME VIEW STYLES --- */
@@ -360,6 +350,14 @@
     
     .score-number { font-size: 4em; font-weight: 800; color: var(--primary-color); display: block; line-height: 1; margin: 10px 0; }
 
+    /* NEW STYLE FOR FINAL TIME */
+    .time-summary {
+        color: #ccc;
+        font-size: 1.1em;
+        margin-top: 15px;
+        font-weight: 500;
+    }
+
     .review-list { width: 100%; display: flex; flex-direction: column; gap: 20px; text-align: left; }
     .review-item { border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; background: var(--white); }
     .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
@@ -478,6 +476,7 @@
             <h2>Assessment Complete</h2>
             <span class="score-number" id="final-score">0%</span>
             <p id="score-text">You answered 0 out of 20 correctly.</p>
+            <p id="final-time" class="time-summary"></p>
         </div>
         
         <h3>Review Answers</h3>
@@ -498,12 +497,10 @@
 
 <script>
     // ========================================================================
-    // 1. CONFIGURATION (PASTE YOUR GOOGLE SCRIPT URL HERE)
+    // 1. CONFIGURATION
     // ========================================================================
-    // 👇👇👇 PEGA TU URL DE SCRIPT AQUI ABAJO 👇👇👇
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzN07vj15V3_H3K0-C4gT2X8N4_y5f9M2sQ1W8_L0p6d/exec"; 
-    // 👆👆👆 --------------------------------------- 👆👆👆
-
+    
     // =========================================
     // 2. DATABASE OF 20 QUESTIONS
     // =========================================
@@ -964,8 +961,18 @@
         document.getElementById('final-score').innerText = percentage + "%";
         document.getElementById('score-text').innerText = `You answered ${userScore} out of ${questions.length} correctly.`;
 
+        // --- CALCULATE FINAL TIME ---
+        const totalSecondsAllowed = 30 * 60;
+        const secondsSpent = totalSecondsAllowed - totalTime;
+        const m = Math.floor(secondsSpent / 60);
+        const s = secondsSpent % 60;
+        const timeString = `${m}m ${s}s`;
+        
+        document.getElementById('final-time').innerText = `Total Time: ${timeString}`;
+
         // --- SEND DATA TO SHEETS ---
-        sendDataToSheet(percentage);
+        // Passing timeString directly so the sheet gets the "5m 30s" format
+        sendDataToSheet(percentage, timeString);
 
         const listContainer = document.getElementById('review-list');
         
@@ -996,8 +1003,7 @@
         });
     }
 
-    function sendDataToSheet(percentage) {
-        // If URL is not set, do nothing
+    function sendDataToSheet(percentage, formattedTime) {
         if(GOOGLE_SCRIPT_URL.includes("PEGAR_AQUI")) {
             console.warn("Google Script URL not set.");
             return;
@@ -1007,7 +1013,7 @@
             score: percentage,
             correct: userScore,
             total: questions.length,
-            timeSpent: document.getElementById('timer').innerText,
+            timeSpent: formattedTime, // Use calculated elapsed time
             details: userAnswers.map(a => `Q${a.questionIndex+1}: ${a.isCorrect ? 'OK' : 'Fail'}`)
         };
 
