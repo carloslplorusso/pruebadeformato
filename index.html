@@ -45,7 +45,7 @@
         overflow: hidden;
         border: 1px solid var(--border-color);
         position: relative;
-        min-height: 600px;
+        min-height: 600px; /* Altura mínima para buen aspecto */
     }
 
     .brand-header {
@@ -86,31 +86,19 @@
     }
 
     /* --- VIEWS CONFIGURATION --- */
-    
-    /* IMPORTANTE: Control de visibilidad inicial */
-    #welcome-view {
-        display: flex; /* Visible al inicio */
+    #welcome-view, #results-view {
+        display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         padding: 60px 20px;
         text-align: center;
-        flex: 1;
+        flex: 1; /* Ocupar todo el espacio disponible */
     }
 
     #quiz-view {
-        display: none; /* Oculto al inicio */
+        display: none; /* Hidden initially */
         flex-direction: row;
-        flex: 1;
-    }
-
-    #results-view {
-        display: none; /* Oculto al inicio */
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 60px 20px;
-        text-align: center;
         flex: 1;
     }
 
@@ -212,7 +200,7 @@
         padding: 30px;
         display: flex;
         flex-direction: column;
-        overflow-y: auto;
+        overflow-y: auto; /* Permitir scroll si la pregunta es larga */
     }
 
     /* --- LIVE SCOREBOARD --- */
@@ -362,28 +350,6 @@
     
     .score-number { font-size: 4em; font-weight: 800; color: var(--primary-color); display: block; line-height: 1; margin: 10px 0; }
 
-    /* Estilo para el tiempo final dentro del cuadro negro */
-    .final-time-container {
-        margin-top: 20px;
-        padding-top: 15px;
-        border-top: 1px solid #333;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
-    .final-time-label {
-        color: #888;
-        font-size: 0.85em;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    .final-time-value {
-        color: var(--white);
-        font-size: 1.4em;
-        font-weight: 700;
-        font-family: monospace;
-    }
-
     .review-list { width: 100%; display: flex; flex-direction: column; gap: 20px; text-align: left; }
     .review-item { border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; background: var(--white); }
     .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
@@ -408,6 +374,7 @@
 
     .brand-footer { background-color: var(--white); border-top: 1px solid var(--border-color); padding: 15px 30px; text-align: center; font-size: 0.9em; font-weight: 600; }
 
+    /* Responsive */
     @media (max-width: 768px) {
         #quiz-view { flex-direction: column; }
         .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); }
@@ -429,8 +396,8 @@
 
     <div id="welcome-view">
         <div class="welcome-card">
-            <h1 class="welcome-title">a ver si cambia</h1>
-            <p class="welcome-subtitle">probando</p>
+            <h1 class="welcome-title">INBDE Pro Method</h1>
+            <p class="welcome-subtitle">Simulated Practice Examination</p>
             
             <div class="welcome-info">
                 <span class="info-pill">📝 20 Questions</span>
@@ -502,11 +469,6 @@
             <h2>Assessment Complete</h2>
             <span class="score-number" id="final-score">0%</span>
             <p id="score-text">You answered 0 out of 20 correctly.</p>
-            
-            <div class="final-time-container">
-                <span class="final-time-label">Total Time Taken</span>
-                <span id="final-time-value" class="final-time-value">0m 0s</span>
-            </div>
         </div>
         
         <h3>Review Answers</h3>
@@ -527,11 +489,9 @@
 
 <script>
     // ========================================================================
-    // 1. CONFIGURATION
+    // 1. CONFIGURATION (PASTE YOUR GOOGLE SCRIPT URL HERE)
     // ========================================================================
-    // 👇👇👇 PEGA TU URL DE SCRIPT AQUI ABAJO 👇👇👇
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzN07vj15V3_H3K0-C4gT2X8N4_y5f9M2sQ1W8_L0p6d/exec"; 
-    // 👆👆👆 --------------------------------------- 👆👆👆
+    const GOOGLE_SCRIPT_URL = "PEGAR_AQUI_TU_URL_DEL_SCRIPT"; 
 
     // =========================================
     // 2. DATABASE OF 20 QUESTIONS
@@ -993,18 +953,8 @@
         document.getElementById('final-score').innerText = percentage + "%";
         document.getElementById('score-text').innerText = `You answered ${userScore} out of ${questions.length} correctly.`;
 
-        // --- CALCULATE FINAL TIME ---
-        const totalSecondsAllowed = 30 * 60;
-        const secondsSpent = totalSecondsAllowed - totalTime;
-        const m = Math.floor(secondsSpent / 60);
-        const s = secondsSpent % 60;
-        const timeString = `${m}m ${s}s`;
-        
-        // Update black box time
-        document.getElementById('final-time-value').innerText = timeString;
-
         // --- SEND DATA TO SHEETS ---
-        sendDataToSheet(percentage, timeString);
+        sendDataToSheet(percentage);
 
         const listContainer = document.getElementById('review-list');
         
@@ -1035,7 +985,8 @@
         });
     }
 
-    function sendDataToSheet(percentage, formattedTime) {
+    function sendDataToSheet(percentage) {
+        // If URL is not set, do nothing
         if(GOOGLE_SCRIPT_URL.includes("PEGAR_AQUI")) {
             console.warn("Google Script URL not set.");
             return;
@@ -1045,7 +996,7 @@
             score: percentage,
             correct: userScore,
             total: questions.length,
-            timeSpent: formattedTime, 
+            timeSpent: document.getElementById('timer').innerText,
             details: userAnswers.map(a => `Q${a.questionIndex+1}: ${a.isCorrect ? 'OK' : 'Fail'}`)
         };
 
