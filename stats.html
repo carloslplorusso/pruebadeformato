@@ -5,239 +5,239 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>INBDE Pro - Global Statistics</title>
 <style>
-    /* --- CSS VARIABLES (INBDE PRO THEME) --- */
-    :root {
-        --primary-color: #fcdc11;
-        --primary-dark: #121212;
-        --light-bg: #f3f4f6;
-        --white: #ffffff;         
-        --border-color: #e5e7eb;  
-        --correct-text: #15803d;
-        --incorrect-text: #b91c1c;
-        --text-muted: #6b7280;
-    }
+    /* --- CSS VARIABLES (INBDE PRO THEME) --- */
+    :root {
+        --primary-color: #fcdc11;
+        --primary-dark: #121212;
+        --light-bg: #f3f4f6;
+        --white: #ffffff;         
+        --border-color: #e5e7eb;  
+        --correct-text: #15803d;
+        --incorrect-text: #b91c1c;
+        --text-muted: #6b7280;
+    }
 
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        background-color: var(--light-bg);
-        color: var(--primary-dark);
-        margin: 0;
-        padding: 20px;
-        line-height: 1.5;
-        display: flex;
-        justify-content: center;
-        min-height: 100vh;
-    }
-    .quiz-wrapper {
-        display: flex;
-        flex-direction: column;
-        width: 1000px;
-        max-width: 100%;
-        background-color: var(--white);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        border-radius: 8px;
-        overflow: hidden;
-        border: 1px solid var(--border-color);
-        position: relative;
-        min-height: 600px;
-    }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--light-bg);
+        color: var(--primary-dark);
+        margin: 0;
+        padding: 20px;
+        line-height: 1.5;
+        display: flex;
+        justify-content: center;
+        min-height: 100vh;
+    }
+    .quiz-wrapper {
+        display: flex;
+        flex-direction: column;
+        width: 1000px;
+        max-width: 100%;
+        background-color: var(--white);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        position: relative;
+        min-height: 600px;
+    }
 
-    .brand-header {
-        background-color: var(--primary-dark);
-        color: var(--primary-color);
-        padding: 15px 20px;
-        font-weight: 800;
-        font-size: 1.2em;
-        border-bottom: 3px solid var(--primary-color);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: relative;
-    }
+    .brand-header {
+        background-color: var(--primary-dark);
+        color: var(--primary-color);
+        padding: 15px 20px;
+        font-weight: 800;
+        font-size: 1.2em;
+        border-bottom: 3px solid var(--primary-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
 
-    .stats-container {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 60px 20px;
-        text-align: center;
-    }
-    .stats-card {
-        max-width: 600px;
-        padding: 40px;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-        width: 100%;
-        background-color: var(--white);
-    }
-    .stats-title {
-        font-size: 2.2em;
-        margin-bottom: 15px;
-        color: var(--primary-dark);
-        line-height: 1.1;
-    }
-    .stats-subtitle {
-        font-size: 1.1em;
-        color: var(--text-muted);
-        margin-bottom: 40px;
-    }
+    .stats-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        text-align: center;
+    }
+    .stats-card {
+        max-width: 600px;
+        padding: 40px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        width: 100%;
+        background-color: var(--white);
+    }
+    .stats-title {
+        font-size: 2.2em;
+        margin-bottom: 15px;
+        color: var(--primary-dark);
+        line-height: 1.1;
+    }
+    .stats-subtitle {
+        font-size: 1.1em;
+        color: var(--text-muted);
+        margin-bottom: 40px;
+    }
 
-    .data-display {
-        text-align: left;
-        margin-top: 30px;
-        border-top: 1px solid var(--border-color);
-        padding-top: 20px;
-        width: 100%;
-    }
-    .data-display p { margin: 10px 0; font-size: 1.1em; }
+    .data-display {
+        text-align: left;
+        margin-top: 30px;
+        border-top: 1px solid var(--border-color);
+        padding-top: 20px;
+        width: 100%;
+    }
+    .data-display p { margin: 10px 0; font-size: 1.1em; }
 
-    .global-percentage {
-        margin-top: 20px;
-        color: var(--primary-dark);
-        font-size: 2em;
-    }
-    .global-percentage strong { 
-        font-size: 1.5em; 
-        color: var(--primary-color); 
-        display: block; 
-        margin-top: 5px; 
-    }
-    .loader {
-        font-style: italic; 
-        color: var(--text-muted);
-        min-height: 150px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .btn-start {
-        background-color: var(--primary-color);
-        color: var(--primary-dark);
-        padding: 12px 30px;
-        font-size: 1.1em;
-        font-weight: 800;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-        transition: all 0.1s;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        text-decoration: none;
-        display: inline-block;
-    }
-    .btn-start:hover { transform: translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,0.1); }
-    .btn-start:active { transform: translateY(2px); box-shadow: none; }
-    
-    .brand-footer { background-color: var(--white); border-top: 1px solid var(--border-color); padding: 15px 30px; text-align: center; font-size: 0.9em; font-weight: 600; }
-    .btn-home-link {
-        background: none;
-        border: 1px solid var(--primary-color);
-        color: var(--primary-color);
-        padding: 5px 10px;
-        font-size: 0.8em;
-        font-weight: 700;
-        cursor: pointer;
-        border-radius: 4px;
-        transition: background-color 0.2s;
-        text-decoration: none;
-    }
-    .btn-home-link:hover {
-        background-color: rgba(252, 220, 17, 0.1);
-    }
+    .global-percentage {
+        margin-top: 20px;
+        color: var(--primary-dark);
+        font-size: 2em;
+    }
+    .global-percentage strong { 
+        font-size: 1.5em; 
+        color: var(--primary-color); 
+        display: block; 
+        margin-top: 5px; 
+    }
+    .loader {
+        font-style: italic; 
+        color: var(--text-muted);
+        min-height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-start {
+        background-color: var(--primary-color);
+        color: var(--primary-dark);
+        padding: 12px 30px;
+        font-size: 1.1em;
+        font-weight: 800;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+        transition: all 0.1s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-start:hover { transform: translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,0.1); }
+    .btn-start:active { transform: translateY(2px); box-shadow: none; }
+    
+    .brand-footer { background-color: var(--white); border-top: 1px solid var(--border-color); padding: 15px 30px; text-align: center; font-size: 0.9em; font-weight: 600; }
+    .btn-home-link {
+        background: none;
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 5px 10px;
+        font-size: 0.8em;
+        font-weight: 700;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+        text-decoration: none;
+    }
+    .btn-home-link:hover {
+        background-color: rgba(252, 220, 17, 0.1);
+    }
 </style>
 </head>
 <body onload="fetchStatistics()">
 
 <div class="quiz-wrapper">
-    <div class="brand-header">
-        <span class="header-left">INBDE Pro</span>
-        <span class="progress-indicator header-right">
-            Dashboard
-            <a href="index.html" class="btn-home-link">🏠 Quiz Home</a>
-        </span>
-    </div>
+    <div class="brand-header">
+        <span class="header-left">INBDE Pro</span>
+        <span class="progress-indicator header-right">
+            Dashboard
+            <a href="index.html" class="btn-home-link">🏠 Quiz Home</a>
+        </span>
+    </div>
 
-    <div class="stats-container">
-        <div class="stats-card">
-            <h1 class="stats-title">Global Performance Dashboard 📊</h1>
-            <p class="stats-subtitle">Review your cumulative results from all completed quizzes.</p>
-            
-            <div id="stats-loader" class="loader">Loading statistics...</div>
-            
-            <div id="stats-display" class="data-display" style="display: none;">
-                <p><strong>Total Quizzes Completed:</strong> <span id="total-quizzes" style="font-weight: 700;">0</span></p>
-                <p><strong>Total Questions Answered:</strong> <span id="total-questions" style="font-weight: 700;">0</span></p>
-                <p style="color: var(--correct-text);"><strong>Total Correct Answers:</strong> <span id="total-correct" style="font-weight: 700;">0</span></p>
-                <p style="color: var(--incorrect-text);"><strong>Total Incorrect Answers:</strong> <span id="total-incorrect" style="font-weight: 700;">0</span></p>
-                
-                <div class="global-percentage">
-                    Global Accuracy: <strong id="global-percentage">0%</strong>
-                </div>
+    <div class="stats-container">
+        <div class="stats-card">
+            <h1 class="stats-title">Global Performance Dashboard 📊</h1>
+            <p class="stats-subtitle">Review your cumulative results from all completed quizzes.</p>
+            
+            <div id="stats-loader" class="loader">Loading statistics...</div>
+            
+            <div id="stats-display" class="data-display" style="display: none;">
+                <p><strong>Total Quizzes Completed:</strong> <span id="total-quizzes" style="font-weight: 700;">0</span></p>
+                <p><strong>Total Questions Answered:</strong> <span id="total-questions" style="font-weight: 700;">0</span></p>
+                <p style="color: var(--correct-text);"><strong>Total Correct Answers:</strong> <span id="total-correct" style="font-weight: 700;">0</span></p>
+                <p style="color: var(--incorrect-text);"><strong>Total Incorrect Answers:</strong> <span id="total-incorrect" style="font-weight: 700;">0</span></p>
+                
+                <div class="global-percentage">
+                    Global Accuracy: <strong id="global-percentage">0%</strong>
+                </div>
 
-                <a href="index.html" class="btn-start" style="margin-top: 40px;">Start New Quiz</a>
-            </div>
-        </div>
-    </div>
+                <a href="index.html" class="btn-start" style="margin-top: 40px;">Start New Quiz</a>
+            </div>
+        </div>
+    </div>
 
-    <div class="brand-footer">INBDE Pro</div>
+    <div class="brand-footer">INBDE Pro</div>
 </div>
 
 <script>
-    // ========================================================================
-    // 1. CONFIGURATION
-    // ========================================================================
-    // USAR LA MISMA URL DEL GOOGLE SCRIPT DESPLEGADO
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzN07vj15V3_H3K0-C4gT2X8N4_y5f9M2sQ1W8_L0p6d/exec"; 
+    // ========================================================================
+    // 1. CONFIGURATION
+    // ========================================================================
+    // USAR LA MISMA URL DEL GOOGLE SCRIPT DESPLEGADO
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTw3BhBLcQGMc5ZY-3AQIZgW2OKHB-oju5O3QmkSiZuadsgwyxrJwUMStLBNQSTrs/exec"; 
 
-    // --- FETCH STATISTICS FUNCTION ---
-    function fetchStatistics() {
-        document.getElementById('stats-loader').style.display = 'flex';
-        document.getElementById('stats-display').style.display = 'none';
+    // --- FETCH STATISTICS FUNCTION ---
+    function fetchStatistics() {
+        document.getElementById('stats-loader').style.display = 'flex';
+        document.getElementById('stats-display').style.display = 'none';
 
-        if(!GOOGLE_SCRIPT_URL) {
-            document.getElementById('stats-loader').innerText = "Error: Google Script URL is missing.";
-            return;
-        }
+        if(!GOOGLE_SCRIPT_URL) {
+            document.getElementById('stats-loader').innerText = "Error: Google Script URL is missing.";
+            return;
+        }
 
-        // Fetch the data from the Google Script (using GET parameter)
-        // Agrega un cache-buster para asegurar datos frescos
-        fetch(`${GOOGLE_SCRIPT_URL}?action=getStats&v=${new Date().getTime()}`)
-            .then(response => {
-                 // Verifica si la respuesta es OK y si el content-type es JSON
-                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                 }
-                 return response.json();
-            })
-            .then(data => {
-                if (data && data.totalQuizzes !== undefined) {
-                    const total = data.totalQuizzes || 0;
-                    const correct = data.totalCorrect || 0;
-                    const answered = data.totalQuestions || 0;
-                    const incorrect = answered - correct;
-                    const percentage = answered > 0 ? Math.round((correct / answered) * 100) : 0;
+        // Fetch the data from the Google Script (using GET parameter)
+        // Agrega un cache-buster para asegurar datos frescos
+        fetch(`${GOOGLE_SCRIPT_URL}?action=getStats&v=${new Date().getTime()}`)
+            .then(response => {
+                 // Verifica si la respuesta es OK y si el content-type es JSON
+                 if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                 }
+                 return response.json();
+            })
+            .then(data => {
+                if (data && data.totalQuizzes !== undefined) {
+                    const total = data.totalQuizzes || 0;
+                    const correct = data.totalCorrect || 0;
+                    const answered = data.totalQuestions || 0;
+                    const incorrect = answered - correct;
+                    const percentage = answered > 0 ? Math.round((correct / answered) * 100) : 0;
 
-                    document.getElementById('total-quizzes').innerText = total;
-                    document.getElementById('total-questions').innerText = answered;
-                    document.getElementById('total-correct').innerText = correct;
-                    document.getElementById('total-incorrect').innerText = incorrect;
-                    document.getElementById('global-percentage').innerText = percentage + "%";
+                    document.getElementById('total-quizzes').innerText = total;
+                    document.getElementById('total-questions').innerText = answered;
+                    document.getElementById('total-correct').innerText = correct;
+                    document.getElementById('total-incorrect').innerText = incorrect;
+                    document.getElementById('global-percentage').innerText = percentage + "%";
 
-                    document.getElementById('stats-loader').style.display = 'none';
-                    document.getElementById('stats-display').style.display = 'block';
-                } else {
-                    document.getElementById('stats-loader').innerText = "No data found or error fetching statistics (Server returned empty data).";
-                }
-            })
-            .catch(error => {
-                console.error("Error fetching statistics:", error);
-                document.getElementById('stats-loader').innerText = "Error fetching statistics. Check the Google Script deployment and console for CORS/network errors.";
-            });
-    }
+                    document.getElementById('stats-loader').style.display = 'none';
+                    document.getElementById('stats-display').style.display = 'block';
+                } else {
+                    document.getElementById('stats-loader').innerText = "No data found or error fetching statistics (Server returned empty data).";
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching statistics:", error);
+                document.getElementById('stats-loader').innerText = "Error fetching statistics. Check the Google Script deployment and console for CORS/network errors.";
+            });
+    }
 </script>
 
 </body>
