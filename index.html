@@ -226,12 +226,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-    // --- CONFIGURACIÓN SUPABASE (CORREGIDA) ---
+    // --- CONFIGURACIÓN SUPABASE ---
     const SUPABASE_URL = 'https://arumiloijqsxthlswojt.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFydW1pbG9panFzeHRobHN3b2p0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0MzUzNTEsImV4cCI6MjA3OTAxMTM1MX0.5EaB81wglbbtNi8FOzJoDMNd_aOmMULzm27pDClJDSg';
     
-    // Usamos 'supabaseClient' para evitar conflictos con la variable global de la librería
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // 🔥 Corrección del nombre de la variable para evitar conflicto con la librería
+    const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // --- DATA ---
     const questions = [
@@ -262,22 +262,25 @@
     let userAnswers = [], questionStartTime, timerInterval, totalTime = 30 * 60;
 
     function showView(viewId) {
-        document.getElementById('welcome-view').style.display = 'none';
-        document.getElementById('quiz-view').style.display = 'none';
-        document.getElementById('results-view').style.display = 'none';
-        document.getElementById(viewId).style.display = viewId === 'quiz-view' ? 'flex' : 'flex';
+        document.getElementById('welcome-view').style.display = viewId === 'welcome-view' ? 'flex' : 'none';
+        document.getElementById('quiz-view').style.display = viewId === 'quiz-view' ? 'flex' : 'none';
+        document.getElementById('results-view').style.display = viewId === 'results-view' ? 'flex' : 'none';
         
-        const progressText = document.getElementById('progress-text');
-        if (viewId === 'welcome-view' || viewId === 'results-view') {
-            progressText.innerHTML = (viewId === 'welcome-view') ? `Welcome <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>` : `Results <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>`;
-        } else {
-            progressText.innerHTML = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
-        }
         document.getElementById('timer').style.display = viewId === 'quiz-view' ? 'inline-block' : 'none';
+        
+        // Update header text/link based on view
+        const progressText = document.getElementById('progress-text');
+        if (viewId === 'quiz-view') {
+             progressText.innerHTML = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+        } else {
+             progressText.innerHTML = viewId === 'results-view' ? 
+                `Results <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>` :
+                `Welcome <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>`;
+        }
     }
 
     function startQuiz() { showView('quiz-view'); loadQuestion(); startTimer(); }
-    
+
     function startTimer() {
         if (timerInterval) clearInterval(timerInterval);
         const timerDisplay = document.getElementById('timer');
@@ -294,18 +297,23 @@
     function loadQuestion() {
         const q = questions[currentQuestionIndex];
         questionStartTime = new Date();
-        document.getElementById('progress-text').innerHTML = `Question ${currentQuestionIndex + 1} of ${questions.length} <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>`;
         
+        // Update Sidebar
         document.getElementById('sidebar-patient').innerText = q.sidebar.patient || "";
         document.getElementById('sidebar-cc').innerText = q.sidebar.cc || "";
         document.getElementById('sidebar-history').innerText = q.sidebar.history || "";
         document.getElementById('sidebar-findings').innerText = q.sidebar.findings || "";
 
+        // Buttons
         const btnXray = document.getElementById('btn-xray');
         const btnPhoto = document.getElementById('btn-photo');
-        if (q.images?.xray) { btnXray.classList.remove('disabled-btn'); btnXray.disabled = false; } else { btnXray.classList.add('disabled-btn'); btnXray.disabled = true; }
-        if (q.images?.photo) { btnPhoto.classList.remove('disabled-btn'); btnPhoto.disabled = false; } else { btnPhoto.classList.add('disabled-btn'); btnPhoto.disabled = true; }
+        if (q.images && q.images.xray) { btnXray.classList.remove('disabled-btn'); btnXray.disabled = false; } 
+        else { btnXray.classList.add('disabled-btn'); btnXray.disabled = true; }
+        
+        if (q.images && q.images.photo) { btnPhoto.classList.remove('disabled-btn'); btnPhoto.disabled = false; } 
+        else { btnPhoto.classList.add('disabled-btn'); btnPhoto.disabled = true; }
 
+        // Content
         document.getElementById('question-text').innerText = q.text;
         const container = document.getElementById('options-container');
         container.innerHTML = '';
@@ -323,23 +331,25 @@
 
     function checkAnswer(el, idx) {
         if (document.querySelector('.option.disabled')) return;
-        const q = questions[currentQuestionIndex];
-        document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
         
+        const q = questions[currentQuestionIndex];
+        const options = document.querySelectorAll('.option');
+        options.forEach(o => o.classList.add('disabled'));
+
         const isCorrect = (idx === q.correct);
         userAnswers.push({ qIndex: currentQuestionIndex, selected: idx, isCorrect });
         answeredCount++;
-        
+
         if (isCorrect) {
             correctCount++; userScore++;
             el.classList.add('correct-answer'); el.querySelector('.option-circle').innerText = '✓';
         } else {
             incorrectCount++;
             el.classList.add('wrong-answer'); el.querySelector('.option-circle').innerText = '✕';
-            const correctEl = document.querySelectorAll('.option')[q.correct];
+            const correctEl = options[q.correct];
             correctEl.classList.add('correct-answer'); correctEl.querySelector('.option-circle').innerText = '✓';
         }
-        
+
         document.getElementById('score-answered').innerText = answeredCount;
         document.getElementById('score-correct').innerText = correctCount;
         document.getElementById('score-incorrect').innerText = incorrectCount;
@@ -366,7 +376,7 @@
         const spent = (30 * 60) - totalTime;
         document.getElementById('final-time-value').innerText = `${Math.floor(spent/60)}m ${spent%60}s`;
 
-        // ENVIAR A SUPABASE
+        // SEND TO SUPABASE (Usando la variable renombrada)
         saveDataSupabase(pct, userScore, questions.length);
 
         const list = document.getElementById('review-list');
@@ -378,7 +388,7 @@
             item.innerHTML = `
                 <div class="review-header"><span class="badge ${ans.isCorrect ? 'correct' : 'incorrect'}">${ans.isCorrect ? 'Correct' : 'Incorrect'}</span></div>
                 <div class="review-question">${i+1}. ${q.text}</div>
-                <div style="font-size:0.9em; margin-bottom:10px;">Correct: <strong>${q.options[q.correct]}</strong></div>
+                <div style="font-size:0.9em; margin-bottom:10px;">Correct Answer: <strong>${q.options[q.correct]}</strong></div>
                 <button class="btn-explain" onclick="toggleExpl(${i})">Explanation</button>
                 <div class="explanation-box" id="expl-${i}"><strong>Rationale:</strong><br>${q.explanation}</div>
             `;
@@ -388,9 +398,10 @@
 
     async function saveDataSupabase(score, correct, total) {
         console.log("Sending to Supabase...");
-        const { error } = await supabaseClient.from('resultados').insert([{ score, correct, total }]);
+        // Usamos _supabase en lugar de supabase para evitar conflicto
+        const { error } = await _supabase.from('resultados').insert([{ score, correct, total }]);
         if (error) console.error('Supabase Error:', error);
-        else console.log('Saved successfully!');
+        else console.log('Saved to Supabase!');
     }
 
     function toggleExpl(i) {
