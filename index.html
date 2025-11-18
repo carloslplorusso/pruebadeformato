@@ -5,514 +5,1133 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>INBDE Pro - Full Practice Quiz</title>
 <style>
-    /* --- CSS VARIABLES (INBDE PRO THEME) --- */
-    :root {
-        --primary-color: #fcdc11; /* Amarillo Marca */
-        --primary-dark: #121212;  /* Negro Marca */
-        --light-bg: #f3f4f6;      /* Fondo Pantalla */
-        --white: #ffffff;         
-        --border-color: #e5e7eb;  
-        --correct-bg: #e6fcf5;
-        --correct-border: #22c55e;
-        --correct-text: #15803d;
-        --incorrect-bg: #fff5f5;
-        --incorrect-border: #ef4444;
-        --incorrect-text: #b91c1c;
-        --text-muted: #6b7280;
-    }
+    /* --- CSS VARIABLES (INBDE PRO THEME) --- */
+    :root {
+        --primary-color: #fcdc11; /* Amarillo Marca */
+        --primary-dark: #121212;  /* Negro Marca */
+        --light-bg: #f3f4f6;      /* Fondo Pantalla */
+        --white: #ffffff;         
+        --border-color: #e5e7eb;  
+        --correct-bg: #e6fcf5;
+        --correct-border: #22c55e;
+        --correct-text: #15803d;
+        --incorrect-bg: #fff5f5;
+        --incorrect-border: #ef4444;
+        --incorrect-text: #b91c1c;
+        --text-muted: #6b7280;
+    }
 
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        background-color: var(--light-bg);
-        color: var(--primary-dark);
-        margin: 0;
-        padding: 20px;
-        line-height: 1.5;
-        display: flex;
-        justify-content: center;
-        min-height: 100vh;
-    }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--light-bg);
+        color: var(--primary-dark);
+        margin: 0;
+        padding: 20px;
+        line-height: 1.5;
+        display: flex;
+        justify-content: center;
+        min-height: 100vh;
+    }
 
-    /* --- LAYOUT WRAPPER --- */
-    .quiz-wrapper {
-        display: flex;
-        flex-direction: column;
-        width: 1000px;
-        max-width: 100%;
-        background-color: var(--white);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        border-radius: 8px;
-        overflow: hidden;
-        border: 1px solid var(--border-color);
-        position: relative;
-        min-height: 600px;
-    }
+    /* --- LAYOUT WRAPPER --- */
+    .quiz-wrapper {
+        display: flex;
+        flex-direction: column;
+        width: 1000px;
+        max-width: 100%;
+        background-color: var(--white);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        position: relative;
+        min-height: 600px;
+    }
 
-    .brand-header {
-        background-color: var(--primary-dark);
-        color: var(--primary-color);
-        padding: 15px 20px;
-        font-weight: 800;
-        font-size: 1.2em;
-        border-bottom: 3px solid var(--primary-color);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: relative;
-    }
+    .brand-header {
+        background-color: var(--primary-dark);
+        color: var(--primary-color);
+        padding: 15px 20px;
+        font-weight: 800;
+        font-size: 1.2em;
+        border-bottom: 3px solid var(--primary-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
 
-    .header-left { z-index: 10; }
-    
-    /* TIMER CENTRADO */
-    .header-center {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        color: var(--white);
-        font-family: monospace;
-        font-size: 1.3em;
-        font-weight: 700;
-        background: rgba(255,255,255,0.15);
-        padding: 5px 15px;
-        border-radius: 6px;
-        letter-spacing: 1px;
-    }
+    .header-left { z-index: 10; }
+    
+    /* TIMER CENTRADO */
+    .header-center {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--white);
+        font-family: monospace;
+        font-size: 1.3em;
+        font-weight: 700;
+        background: rgba(255,255,255,0.15);
+        padding: 5px 15px;
+        border-radius: 6px;
+        letter-spacing: 1px;
+    }
 
-    .progress-indicator {
-        color: var(--white);
-        font-size: 0.9em;
-        font-weight: 400;
-        z-index: 10;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-    .btn-stats-link {
-        background: none;
-        border: 1px solid var(--primary-color);
-        color: var(--primary-color);
-        padding: 5px 10px;
-        font-size: 0.8em;
-        font-weight: 700;
-        cursor: pointer;
-        border-radius: 4px;
-        transition: background-color 0.2s;
-        text-decoration: none; /* Asegura que no tenga subrayado */
-    }
-    .btn-stats-link:hover {
-        background-color: rgba(252, 220, 17, 0.1);
-    }
-    
-    /* --- VIEWS CONFIGURATION --- */
-    
-    .view-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 60px 20px;
-        text-align: center;
-        flex: 1;
-    }
-    
-    #welcome-view { display: flex; } /* Visible al inicio */
-    #quiz-view { display: none; flex-direction: row; }
-    #results-view { display: none; }
+    .progress-indicator {
+        color: var(--white);
+        font-size: 0.9em;
+        font-weight: 400;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .btn-stats-link {
+        background: none;
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 5px 10px;
+        font-size: 0.8em;
+        font-weight: 700;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+        text-decoration: none; /* Asegura que no tenga subrayado */
+    }
+    .btn-stats-link:hover {
+        background-color: rgba(252, 220, 17, 0.1);
+    }
+    
+    /* --- VIEWS CONFIGURATION --- */
+    
+    .view-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        text-align: center;
+        flex: 1;
+    }
+    
+    #welcome-view { display: flex; } /* Visible al inicio */
+    #quiz-view { display: none; flex-direction: row; }
+    #results-view { display: none; }
 
 
-    /* --- WELCOME VIEW STYLES --- */
-    .welcome-card {
-        max-width: 500px;
-        animation: fadeIn 0.5s ease-out;
-    }
-    .welcome-title {
-        font-size: 2.8em;
-        margin-bottom: 15px;
-        color: var(--primary-dark);
-        line-height: 1.1;
-    }
-    .welcome-subtitle {
-        font-size: 1.1em;
-        color: var(--text-muted);
-        margin-bottom: 40px;
-    }
-    .welcome-info {
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-        margin-bottom: 40px;
-    }
-    .info-pill {
-        background: #f3f4f6;
-        padding: 10px 20px;
-        border-radius: 30px;
-        font-weight: 600;
-        font-size: 0.95em;
-        border: 1px solid var(--border-color);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
+    /* --- WELCOME VIEW STYLES --- */
+    .welcome-card {
+        max-width: 500px;
+        animation: fadeIn 0.5s ease-out;
+    }
+    .welcome-title {
+        font-size: 2.8em;
+        margin-bottom: 15px;
+        color: var(--primary-dark);
+        line-height: 1.1;
+    }
+    .welcome-subtitle {
+        font-size: 1.1em;
+        color: var(--text-muted);
+        margin-bottom: 40px;
+    }
+    .welcome-info {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-bottom: 40px;
+    }
+    .info-pill {
+        background: #f3f4f6;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 0.95em;
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 
-    .btn-start {
-        background-color: var(--primary-color);
-        color: var(--primary-dark);
-        padding: 16px 60px;
-        font-size: 1.4em;
-        font-weight: 800;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-        transition: all 0.1s;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .btn-start:hover { transform: translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,0.1); }
-    .btn-start:active { transform: translateY(2px); box-shadow: none; }
+    .btn-start {
+        background-color: var(--primary-color);
+        color: var(--primary-dark);
+        padding: 16px 60px;
+        font-size: 1.4em;
+        font-weight: 800;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+        transition: all 0.1s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .btn-start:hover { transform: translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,0.1); }
+    .btn-start:active { transform: translateY(2px); box-shadow: none; }
 
-    /* Sidebar Styles */
-    .sidebar {
-        width: 300px;
-        border-right: 1px solid var(--border-color);
-        display: flex;
-        flex-direction: column;
-        flex-shrink: 0;
-        background-color: #fdfdfd;
-    }
+    /* Sidebar Styles */
+    .sidebar {
+        width: 300px;
+        border-right: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        background-color: #fdfdfd;
+    }
 
-    .toggle-buttons {
-        display: flex;
-        padding: 10px;
-        gap: 10px;
-        justify-content: flex-end;
-        border-bottom: 1px solid var(--border-color);
-    }
+    .toggle-buttons {
+        display: flex;
+        padding: 10px;
+        gap: 10px;
+        justify-content: flex-end;
+        border-bottom: 1px solid var(--border-color);
+    }
 
-    .btn-toggle {
-        background: var(--white);
-        border: 1px solid var(--primary-dark);
-        padding: 6px 12px;
-        font-weight: 700;
-        cursor: pointer;
-        font-size: 11px;
-        text-transform: uppercase;
-        transition: all 0.2s;
-    }
-    .btn-toggle:hover:not(.disabled-btn) { background-color: var(--primary-color); }
-    .btn-toggle.disabled-btn { opacity: 0.3; cursor: not-allowed; border-color: #ccc; color: #999; }
+    .btn-toggle {
+        background: var(--white);
+        border: 1px solid var(--primary-dark);
+        padding: 6px 12px;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 11px;
+        text-transform: uppercase;
+        transition: all 0.2s;
+    }
+    .btn-toggle:hover:not(.disabled-btn) { background-color: var(--primary-color); }
+    .btn-toggle.disabled-btn { opacity: 0.3; cursor: not-allowed; border-color: #ccc; color: #999; }
 
-    .info-block { border-bottom: 1px solid var(--border-color); }
-    .info-header {
-        background-color: #e5e7eb;
-        padding: 8px 12px;
-        font-weight: 700;
-        font-size: 13px;
-        border-bottom: 1px solid var(--border-color);
-    }
-    .info-content { padding: 12px; font-size: 14px; line-height: 1.4; }
+    .info-block { border-bottom: 1px solid var(--border-color); }
+    .info-header {
+        background-color: #e5e7eb;
+        padding: 8px 12px;
+        font-weight: 700;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .info-content { padding: 12px; font-size: 14px; line-height: 1.4; }
 
-    /* Main Content Styles */
-    .main-content {
-        flex-grow: 1;
-        padding: 30px;
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-    }
+    /* Main Content Styles */
+    .main-content {
+        flex-grow: 1;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
 
-    /* --- LIVE SCOREBOARD --- */
-    .scoreboard {
-        display: flex;
-        gap: 20px;
-        background-color: #f9fafb;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        padding: 10px 15px;
-        margin-bottom: 20px;
-        font-size: 0.9em;
-        font-weight: 600;
-        align-items: center;
-    }
+    /* --- LIVE SCOREBOARD --- */
+    .scoreboard {
+        display: flex;
+        gap: 20px;
+        background-color: #f9fafb;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 10px 15px;
+        margin-bottom: 20px;
+        font-size: 0.9em;
+        font-weight: 600;
+        align-items: center;
+    }
 
-    .score-item { display: flex; align-items: center; gap: 6px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; }
-    .dot.gray { background-color: var(--text-muted); }
-    .dot.green { background-color: var(--correct-border); }
-    .dot.red { background-color: var(--incorrect-border); }
+    .score-item { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot.gray { background-color: var(--text-muted); }
+    .dot.green { background-color: var(--correct-border); }
+    .dot.red { background-color: var(--incorrect-border); }
 
-    .question-text {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 25px;
-    }
+    .question-text {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 25px;
+    }
 
-    /* --- OPTIONS --- */
-    .options-list {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
+    /* --- OPTIONS --- */
+    .options-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
 
-    .option {
-        display: flex;
-        align-items: center;
-        padding: 15px;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 15px;
-        transition: all 0.2s;
-        background-color: var(--white);
-        position: relative;
-    }
+    .option {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 15px;
+        transition: all 0.2s;
+        background-color: var(--white);
+        position: relative;
+    }
 
-    .option:hover:not(.disabled) {
-        border-color: var(--primary-dark);
-        background-color: #f9fafb;
-    }
+    .option:hover:not(.disabled) {
+        border-color: var(--primary-dark);
+        background-color: #f9fafb;
+    }
 
-    .option-circle {
-        height: 20px;
-        width: 20px;
-        border-radius: 50%;
-        border: 1px solid #9ca3af;
-        margin-right: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        color: white;
-        font-weight: bold;
-    }
+    .option-circle {
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        border: 1px solid #9ca3af;
+        margin-right: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: white;
+        font-weight: bold;
+    }
 
-    /* States */
-    .option.correct-answer {
-        background-color: var(--correct-bg);
-        border-color: var(--correct-border);
-        font-weight: 600;
-        color: var(--correct-text);
-    }
-    .option.correct-answer .option-circle {
-        border-color: var(--correct-border);
-        background-color: var(--correct-border);
-        content: "✓";
-    }
+    /* States */
+    .option.correct-answer {
+        background-color: var(--correct-bg);
+        border-color: var(--correct-border);
+        font-weight: 600;
+        color: var(--correct-text);
+    }
+    .option.correct-answer .option-circle {
+        border-color: var(--correct-border);
+        background-color: var(--correct-border);
+        content: "✓";
+    }
 
-    .option.wrong-answer {
-        background-color: var(--incorrect-bg);
-        border-color: var(--incorrect-border);
-        color: var(--incorrect-text);
-    }
-    .option.wrong-answer .option-circle {
-        border-color: var(--incorrect-border);
-        background-color: var(--incorrect-border);
-    }
+    .option.wrong-answer {
+        background-color: var(--incorrect-bg);
+        border-color: var(--incorrect-border);
+        color: var(--incorrect-text);
+    }
+    .option.wrong-answer .option-circle {
+        border-color: var(--incorrect-border);
+        background-color: var(--incorrect-border);
+    }
 
-    .option.disabled { cursor: default; pointer-events: none; }
+    .option.disabled { cursor: default; pointer-events: none; }
 
-    /* --- FEEDBACK --- */
-    .feedback-message {
-        margin-top: 20px;
-        padding: 15px;
-        border-radius: 6px;
-        font-weight: 700;
-        text-align: center;
-        display: none;
-    }
-    .feedback-message.success { background-color: var(--correct-bg); color: var(--correct-text); border: 1px solid var(--correct-border); }
-    .feedback-message.error { background-color: var(--incorrect-bg); color: var(--incorrect-text); border: 1px solid var(--incorrect-border); }
-    
-    .time-taken {
-        display: block;
-        font-size: 0.85em;
-        font-weight: 400;
-        margin-top: 5px;
-        opacity: 0.9;
-    }
+    /* --- FEEDBACK --- */
+    .feedback-message {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 6px;
+        font-weight: 700;
+        text-align: center;
+        display: none;
+    }
+    .feedback-message.success { background-color: var(--correct-bg); color: var(--correct-text); border: 1px solid var(--correct-border); }
+    .feedback-message.error { background-color: var(--incorrect-bg); color: var(--incorrect-text); border: 1px solid var(--incorrect-border); }
+    
+    .time-taken {
+        display: block;
+        font-size: 0.85em;
+        font-weight: 400;
+        margin-top: 5px;
+        opacity: 0.9;
+    }
 
-    .actions-area {
-        margin-top: 25px;
-        display: flex;
-        justify-content: flex-end;
-        padding-bottom: 20px;
-    }
+    .actions-area {
+        margin-top: 25px;
+        display: flex;
+        justify-content: flex-end;
+        padding-bottom: 20px;
+    }
 
-    .btn-next {
-        background-color: var(--primary-dark);
-        color: var(--primary-color);
-        padding: 12px 24px;
-        border: none;
-        border-radius: 6px;
-        font-size: 16px;
-        font-weight: 700;
-        cursor: pointer;
-        display: none;
-        transition: opacity 0.2s;
-    }
-    .btn-next:hover { opacity: 0.9; }
+    .btn-next {
+        background-color: var(--primary-dark);
+        color: var(--primary-color);
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        display: none;
+        transition: opacity 0.2s;
+    }
+    .btn-next:hover { opacity: 0.9; }
 
-    /* --- RESULTS VIEW STYLES --- */
-    .score-card {
-        background-color: var(--primary-dark);
-        color: var(--white);
-        padding: 40px;
-        border-radius: 12px;
-        text-align: center;
-        margin-bottom: 40px;
-        width: 100%;
-        max-width: 500px;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        animation: fadeIn 0.6s ease-out;
-    }
-    
-    .score-number { font-size: 4em; font-weight: 800; color: var(--primary-color); display: block; line-height: 1; margin: 10px 0; }
+    /* --- RESULTS VIEW STYLES --- */
+    .score-card {
+        background-color: var(--primary-dark);
+        color: var(--white);
+        padding: 40px;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 40px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        animation: fadeIn 0.6s ease-out;
+    }
+    
+    .score-number { font-size: 4em; font-weight: 800; color: var(--primary-color); display: block; line-height: 1; margin: 10px 0; }
 
-    /* Estilo para el tiempo final dentro del cuadro negro */
-    .final-time-container {
-        margin-top: 20px;
-        padding-top: 15px;
-        border-top: 1px solid #333;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
-    .final-time-label {
-        color: #888;
-        font-size: 0.85em;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    .final-time-value {
-        color: var(--white);
-        font-size: 1.4em;
-        font-weight: 700;
-        font-family: monospace;
-    }
+    /* Estilo para el tiempo final dentro del cuadro negro */
+    .final-time-container {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #333;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .final-time-label {
+        color: #888;
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .final-time-value {
+        color: var(--white);
+        font-size: 1.4em;
+        font-weight: 700;
+        font-family: monospace;
+    }
 
-    .review-list { width: 100%; display: flex; flex-direction: column; gap: 20px; text-align: left; }
-    .review-item { border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; background: var(--white); }
-    .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-    .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
-    .badge.correct { background: var(--correct-bg); color: var(--correct-text); border: 1px solid var(--correct-border); }
-    .badge.incorrect { background: var(--incorrect-bg); color: var(--incorrect-text); border: 1px solid var(--incorrect-border); }
-    .review-question { font-weight: 600; margin-bottom: 10px; font-size: 1.1em; }
-    .btn-explain { background: transparent; border: 1px solid var(--border-color); padding: 5px 10px; cursor: pointer; font-size: 12px; border-radius: 4px; margin-top: 10px; }
-    .btn-explain:hover { background: #f9fafb; }
-    .explanation-box { display: none; margin-top: 15px; padding: 15px; background-color: #fdfdfd; border-left: 4px solid var(--primary-color); border: 1px solid var(--border-color); font-size: 14px; }
+    .review-list { width: 100%; display: flex; flex-direction: column; gap: 20px; text-align: left; }
+    .review-item { border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; background: var(--white); }
+    .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+    .badge.correct { background: var(--correct-bg); color: var(--correct-text); border: 1px solid var(--correct-border); }
+    .badge.incorrect { background: var(--incorrect-bg); color: var(--incorrect-text); border: 1px solid var(--incorrect-border); }
+    .review-question { font-weight: 600; margin-bottom: 10px; font-size: 1.1em; }
+    .btn-explain { background: transparent; border: 1px solid var(--border-color); padding: 5px 10px; cursor: pointer; font-size: 12px; border-radius: 4px; margin-top: 10px; }
+    .btn-explain:hover { background: #f9fafb; }
+    .explanation-box { display: none; margin-top: 15px; padding: 15px; background-color: #fdfdfd; border-left: 4px solid var(--primary-color); border: 1px solid var(--border-color); font-size: 14px; }
 
-    /* --- MODAL --- */
-    .modal-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-    .modal-content { position: relative; max-width: 90%; max-height: 90%; animation: zoomIn 0.2s ease-out; }
-    .modal-content img { max-width: 100%; max-height: 80vh; border-radius: 4px; border: 2px solid var(--white); display: block; }
-    .close-btn { position: absolute; top: -40px; right: 0; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-    .close-btn:hover { color: var(--primary-color); }
-    .modal-caption { color: #fff; text-align: center; margin-top: 10px; font-size: 14px; font-weight: 500; }
+    /* --- MODAL --- */
+    .modal-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+    .modal-content { position: relative; max-width: 90%; max-height: 90%; animation: zoomIn 0.2s ease-out; }
+    .modal-content img { max-width: 100%; max-height: 80vh; border-radius: 4px; border: 2px solid var(--white); display: block; }
+    .close-btn { position: absolute; top: -40px; right: 0; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+    .close-btn:hover { color: var(--primary-color); }
+    .modal-caption { color: #fff; text-align: center; margin-top: 10px; font-size: 14px; font-weight: 500; }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes zoomIn { from {transform: scale(0.9); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes zoomIn { from {transform: scale(0.9); opacity: 0;} to {transform: scale(1); opacity: 1;} }
 
-    .brand-footer { background-color: var(--white); border-top: 1px solid var(--border-color); padding: 15px 30px; text-align: center; font-size: 0.9em; font-weight: 600; }
+    .brand-footer { background-color: var(--white); border-top: 1px solid var(--border-color); padding: 15px 30px; text-align: center; font-size: 0.9em; font-weight: 600; }
 
-    @media (max-width: 768px) {
-        #quiz-view { flex-direction: column; }
-        .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); }
-        .quiz-wrapper { width: 100%; border: none; border-radius: 0; }
-        .scoreboard { flex-direction: column; align-items: flex-start; gap: 10px; }
-        .header-center { position: static; transform: none; margin: 5px 0; display: inline-block; }
-        .brand-header { flex-direction: column; }
-        .progress-indicator { gap: 8px; flex-direction: column; align-items: flex-end; }
-    }
+    @media (max-width: 768px) {
+        #quiz-view { flex-direction: column; }
+        .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); }
+        .quiz-wrapper { width: 100%; border: none; border-radius: 0; }
+        .scoreboard { flex-direction: column; align-items: flex-start; gap: 10px; }
+        .header-center { position: static; transform: none; margin: 5px 0; display: inline-block; }
+        .brand-header { flex-direction: column; }
+        .progress-indicator { gap: 8px; flex-direction: column; align-items: flex-end; }
+    }
 </style>
 </head>
-<body onload="fetchStatistics()">
+<body>
 
 <div class="quiz-wrapper">
-    <div class="brand-header">
-        <span class="header-left">INBDE Pro</span>
-        <span class="progress-indicator header-right">
-            Dashboard
-            <a href="index.html" class="btn-home-link">🏠 Quiz Home</a>
-        </span>
-    </div>
+    <div class="brand-header">
+        <span class="header-left">INBDE Pro</span>
+        <span id="timer" class="header-center" style="display:none;">30:00</span>
+        <span class="progress-indicator header-right" id="progress-text">
+            Welcome
+            <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>
+        </span>
+    </div>
 
-    <div class="stats-container">
-        <div class="stats-card">
-            <h1 class="stats-title">Global Performance Dashboard 📊</h1>
-            <p class="stats-subtitle">Review your cumulative results from all completed quizzes.</p>
-            
-            <div id="stats-loader" class="loader">Loading statistics...</div>
-            
-            <div id="stats-display" class="data-display" style="display: none;">
-                <p><strong>Total Quizzes Completed:</strong> <span id="total-quizzes" style="font-weight: 700;">0</span></p>
-                <p><strong>Total Questions Answered:</strong> <span id="total-questions" style="font-weight: 700;">0</span></p>
-                <p style="color: var(--correct-text);"><strong>Total Correct Answers:</strong> <span id="total-correct" style="font-weight: 700;">0</span></p>
-                <p style="color: var(--incorrect-text);"><strong>Total Incorrect Answers:</strong> <span id="total-incorrect" style="font-weight: 700;">0</span></p>
-                
-                <div class="global-percentage">
-                    Global Accuracy: <strong id="global-percentage">0%</strong>
-                </div>
+    <div id="welcome-view" class="view-container">
+        <div class="welcome-card">
+            <h1 class="welcome-title">INBDE Pro Method</h1>
+            <p class="welcome-subtitle">Simulated Practice Examination</p>
+            
+            <div class="welcome-info">
+                <span class="info-pill">📝 20 Questions</span>
+                <span class="info-pill">⏱️ 30 Minutes</span>
+            </div>
+            
+            <button class="btn-start" onclick="startQuiz()">START QUIZ</button>
+        </div>
+    </div>
 
-                <a href="index.html" class="btn-start" style="margin-top: 40px;">Start New Quiz</a>
-            </div>
-        </div>
-    </div>
+    <div id="quiz-view">
+        <div class="sidebar">
+            <div class="toggle-buttons">
+                <button class="btn-toggle" id="btn-xray" onclick="openImage('xray')">X-RAYS</button>
+                <button class="btn-toggle" id="btn-photo" onclick="openImage('photo')">PHOTOS</button>
+            </div>
+            <div class="info-block">
+                <div class="info-header">Patient</div>
+                <div class="info-content" id="sidebar-patient">Loading...</div>
+            </div>
+            <div class="info-block">
+                <div class="info-header">Chief Complaint</div>
+                <div class="info-content" id="sidebar-cc">Loading...</div>
+            </div>
+            <div class="info-block">
+                <div class="info-header">History</div>
+                <div class="info-content" id="sidebar-history">Loading...</div>
+            </div>
+            <div class="info-block">
+                <div class="info-header">Current Findings</div>
+                <div class="info-content" id="sidebar-findings">Loading...</div>
+            </div>
+        </div>
 
-    <div class="brand-footer">INBDE Pro</div>
+        <div class="main-content">
+            
+            <div class="scoreboard">
+                <div class="score-item">
+                    <span class="dot gray"></span>
+                    Answered: <span id="score-answered">0</span>
+                </div>
+                <div class="score-item">
+                    <span class="dot green"></span>
+                    Correct: <span id="score-correct">0</span>
+                </div>
+                <div class="score-item">
+                    <span class="dot red"></span>
+                    Incorrect: <span id="score-incorrect">0</span>
+                </div>
+            </div>
+
+            <div class="question-text" id="question-text">
+                Loading question...
+            </div>
+
+            <div class="options-list" id="options-container">
+                </div>
+
+            <div id="feedbackDisplay" class="feedback-message"></div>
+
+            <div class="actions-area">
+                <button class="btn-next" id="btn-next" onclick="nextQuestion()">Next Question →</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="results-view" class="view-container">
+        <div class="score-card">
+            <h2>Assessment Complete</h2>
+            <span class="score-number" id="final-score">0%</span>
+            <p id="score-text">You answered 0 out of 20 correctly.</p>
+            
+            <div class="final-time-container">
+                <span class="final-time-label">Total Time Taken</span>
+                <span id="final-time-value" class="final-time-value">0m 0s</span>
+            </div>
+        </div>
+        
+        <h3>Review Answers</h3>
+        <div class="review-list" id="review-list">
+            </div>
+            
+        <a href="stats.html" class="btn-start" style="margin-top: 40px; font-size: 1.1em; padding: 12px 30px;">View Global Stats</a>
+    </div>
+
+    <div class="brand-footer">INBDE Pro</div>
+</div>
+
+<div id="image-modal" class="modal-overlay" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <img id="modal-img" src="" alt="Clinical Image">
+        <div id="modal-caption" class="modal-caption"></div>
+    </div>
 </div>
 
 <script>
-    // ========================================================================
-    // 1. CONFIGURATION
-    // ========================================================================
-    // USAR LA MISMA URL DEL GOOGLE SCRIPT DESPLEGADO
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTw3BhBLcQGMc5ZY-3AQIZgW2OKHB-oju5O3QmkSiZuadsgwyxrJwUMStLBNQSTrs/exec"; 
+    // ========================================================================
+    // 1. CONFIGURATION
+    // ========================================================================
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTw3BhBLcQGMc5ZY-3AQIZgW2OKHB-oju5O3QmkSiZuadsgwyxrJwUMStLBNQSTrs/exec";
+    // 👆👆👆 URL DE TU SCRIPT DE GOOGLE AÑADIDA AQUÍ 👆👆👆
 
-    // --- FETCH STATISTICS FUNCTION ---
-    function fetchStatistics() {
-        document.getElementById('stats-loader').style.display = 'flex';
-        document.getElementById('stats-display').style.display = 'none';
+    // =========================================
+    // 2. DATABASE OF 20 QUESTIONS
+    // =========================================
+    const questions = [
+        {
+            id: 1,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Male, 24 years old",
+                cc: "\"I am extremely nervous about getting this cavity filled.\"",
+                history: "History of dental anxiety. No systemic contraindications to sedation.",
+                findings: "Class I caries on tooth #30. Patient is currently receiving N2O/O2. Vitals are stable."
+            },
+            text: "A patient is undergoing a procedure with nitrous oxide and oxygen. They are relaxed, able to respond purposefully to verbal commands, and their airway reflexes are intact. Which level of sedation does this MOST LIKELY represent?",
+            options: ["Minimal Sedation (Anxiolysis)", "Moderate Sedation", "Deep Sedation", "General Anesthesia"],
+            correct: 0,
+            explanation: "The document lists minimal sedation, moderate sedation, deep sedation, and general anesthesia as levels of anxiety and pain control. Nitrous oxide/oxygen often produces minimal sedation, where the patient normally responds to verbal commands."
+        },
+        {
+            id: 2,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Female, 28 years old",
+                cc: "\"I have a bump on my gum that bleeds when I brush.\"",
+                history: "Patient is in the second trimester of pregnancy (22 weeks).",
+                findings: "Localized, pedunculated, erythematous mass on the interdental papilla between #8 and #9."
+            },
+            text: "A pregnant patient in her second trimester presents with a localized, round, red growth on the interdental papilla that bleeds easily. This lesion is MOST LIKELY a:",
+            options: ["Fibroma", "Pyogenic Granuloma (Granuloma Gravidarum)", "Peripheral Giant Cell Granuloma", "Papilloma"],
+            correct: 1,
+            explanation: "The document explicitly states that a 'pyogenic granuloma (aka. granuloma gravidarum) is a round growth... that may develop due to hormonal changes' during pregnancy."
+        },
+        {
+            id: 3,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Female, 32 years old",
+                cc: "\"I need a tooth extraction.\"",
+                history: "Patient is 34 weeks pregnant (Third Trimester).",
+                findings: "Non-restorable caries on tooth #30. Patient feels faint when lying flat."
+            },
+            text: "To prevent supine hypotensive syndrome in a pregnant patient during the third trimester, how should the patient be positioned in the dental chair?",
+            options: ["Completely supine", "Trendelenburg position", "Left lateral decubitus position", "Right lateral decubitus position"],
+            correct: 2,
+            explanation: "The document indicates that the 'Left lateral decubitus' position is used to relieve pressure on the inferior vena cava exerted by the uterus."
+        },
+        {
+            id: 4,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Female, 30 years old",
+                cc: "\"Is this medication safe for my baby?\"",
+                history: "First trimester of pregnancy.",
+                findings: "Patient requires medication for a systemic condition where the benefits outweigh the risks."
+            },
+            text: "Which FDA pregnancy category describes drugs for which there is positive evidence of human fetal risk based on adverse reaction data, but potential benefits may warrant use of the drug in pregnant women despite potential risks?",
+            options: ["Category A", "Category B", "Category C", "Category D"],
+            correct: 3,
+            explanation: "The table defining risk categories states that Category D indicates 'Human data indicating risk,' but may be used if benefits are acceptable despite the risk."
+        },
+        {
+            id: 5,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Female, 26 years old",
+                cc: "\"My face is swollen and throbbing.\"",
+                history: "18 weeks pregnant. No known drug allergies.",
+                findings: "Facial swelling originating from necrotic tooth #19. Systemic antibiotic therapy is indicated."
+            },
+            text: "A pregnant patient requires an antibiotic for an odontogenic infection. She has no known drug allergies. Which of the following is considered SAFEST to prescribe (Category B)?",
+            options: ["Doxycycline", "Amoxicillin", "Clarithromycin", "Tetracycline"],
+            correct: 1,
+            explanation: "Amoxicillin is listed as a Category B antibiotic, which is considered safe. Tetracyclines (including Doxycycline) are Category D, and Clarithromycin is Category C."
+        },
+        {
+            id: 6,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Male, 55 years old",
+                cc: "\"I've been feeling very tired lately.\"",
+                history: "History of anemia.",
+                findings: "Dentist is reviewing the patient's recent Complete Blood Count (CBC) results prior to surgery."
+            },
+            text: "Which component of a complete blood count (CBC) is specifically used to assess the variation in red blood cell size?",
+            options: ["MCV (Mean Corpuscular Volume)", "MCH (Mean Corpuscular Hemoglobin)", "MCHC (Mean Corpuscular Hemoglobin Concentration)", "RDW (Red Cell Distribution Width)"],
+            correct: 3,
+            explanation: "The erythrogram section states that 'RBC size variation' is measured by 'red cell distribution width or RDW'."
+        },
+        {
+            id: 7,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Female, 40 years old",
+                cc: "\"My gums look very pale.\"",
+                history: "Reports heavy menstrual cycles and fatigue.",
+                findings: "Pale oral mucosa. Hemogram shows Low Hb and Low MCV."
+            },
+            text: "A patient's hemogram reveals a low Hemoglobin and a low Mean Corpuscular Volume (MCV). Which of the following conditions is a MOST LIKELY differential diagnosis?",
+            options: ["Folic acid deficiency", "Vitamin B12 deficiency", "Iron Deficiency Anemia (IDA)", "Liver disease"],
+            correct: 2,
+            explanation: "The anemia flowchart shows that 'Low' MCV is associated with 'IDA' (Iron Deficiency Anemia), Thalassemia, Lead poisoning, and Chronic disease. Folic acid and B12 deficiencies cause high MCV."
+        },
+        {
+            id: 8,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "N/A (Board Review)",
+                cc: "N/A",
+                history: "Regulatory compliance review.",
+                findings: "Reviewing controlled substance classifications and prescribing limitations."
+            },
+            text: "A drug with a high potential for abuse, no currently accepted medical use in treatment in the United States, and a lack of accepted safety for use under medical supervision would be classified as:",
+            options: ["Schedule I", "Schedule II", "Schedule III", "Schedule IV"],
+            correct: 0,
+            explanation: "Schedule I drugs have 'High abuse potential with no accepted medical use,' such as heroin or LSD."
+        },
+        {
+            id: 9,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Male, 45 years old",
+                cc: "\"I am in severe pain after the surgery.\"",
+                history: "Recent complex extraction of impacted wisdom teeth.",
+                findings: "Patient requires a potent analgesic. Dentist is writing a prescription."
+            },
+            text: "Which of the following analgesics is classified as a Schedule II controlled substance?",
+            options: ["Acetaminophen with Codeine (Tylenol #3)", "Ibuprofen", "Oxycodone", "Tramadol"],
+            correct: 2,
+            explanation: "Oxycodone, morphine, and hydrocodone are listed as examples of Schedule II drugs. Tylenol with Codeine is listed under Schedule III, and Tramadol is Schedule IV."
+        },
+        {
+            id: 10,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Female, 22 years old",
+                cc: "\"Numb me up good, I hate pain.\"",
+                history: "No medical contraindications.",
+                findings: "Preparing for operative dentistry. Administering 2% Lidocaine."
+            },
+            text: "Local anesthetics exert their primary effect by:",
+            options: ["Blocking voltage-gated calcium channels", "Blocking voltage-gated sodium (Na+) channels", "Enhancing GABA receptor activity", "Inhibiting prostaglandin synthesis"],
+            correct: 1,
+            explanation: "The document explicitly states: 'Local anaesthetic agents suppress action potentials in excitable tissues by blocking voltage-gated Na+ channels'."
+        },
+        {
+            id: 11,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Male, 65 years old",
+                cc: "\"I'm here for my cleaning.\"",
+                history: "History of hyperlipidemia and coronary artery disease. Taking Atorvastatin.",
+                findings: "Intraoral exam is within normal limits. Reviewing medication list."
+            },
+            text: "Statins, used to lower LDL cholesterol, work by competitively inhibiting which enzyme?",
+            options: ["Angiotensin-converting enzyme (ACE)", "Cyclooxygenase (COX)", "HMG-CoA reductase", "Monoamine oxidase (MAO)"],
+            correct: 2,
+            explanation: "Statins work by 'competitively blocking the active site of... HMG-CoA reductase,' the rate-limiting enzyme in the mevalonate pathway."
+        },
+        {
+            id: 12,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Male, 25 years old",
+                cc: "\"My teeth are rotting out.\"",
+                history: "History of substance abuse (methamphetamines).",
+                findings: "Rampant caries (\"Meth mouth\"), xerostomia, and bruxism."
+            },
+            text: "Regular use of amphetamines can lead to several adverse oral and systemic effects. Which of the following is NOT typically associated with amphetamine use as listed in the document?",
+            options: ["Reduced appetite and extreme weight loss", "Dry mouth (Xerostomia)", "Decreased heart rate (Bradycardia)", "Dental problems (\"Meth mouth\")"],
+            correct: 2,
+            explanation: "Amphetamines are stimulants that 'speed up the messages' and when combined with other substances can increase heart rate. Bradycardia (slow heart rate) is not a typical effect; the list includes reduced appetite, dry mouth, and dental problems."
+        },
+        {
+            id: 13,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Female, 45 years old",
+                cc: "\"I get very nauseous during dental treatment.\"",
+                history: "Severe gag reflex and motion sickness.",
+                findings: "Dentist considers adjunctive medication to manage nausea/gagging."
+            },
+            text: "Scopolamine is an anticholinergic drug primarily indicated for the prevention of:",
+            options: ["Hypertension", "Seizures", "Nausea and vomiting associated with motion sickness", "Bacterial infections"],
+            correct: 2,
+            explanation: "Scopolamine is indicated for 'the treatment of nausea and vomiting associated with motion sickness and postoperative nausea and vomiting'."
+        },
+        {
+            id: 14,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Male, 19 years old",
+                cc: "None (Emergency situation).",
+                history: "No significant medical history. High anxiety.",
+                findings: "Patient became pale and lost consciousness immediately after local anesthetic injection. Pulse is weak but present."
+            },
+            text: "The MOST COMMON medical emergency in the dental office is syncope. What is the immediate management step for a patient experiencing vasovagal syncope?",
+            options: ["Administer epinephrine immediately", "Place patient in a supine position with legs elevated", "Administer nitroglycerin sublingually", "Have the patient breathe into a paper bag"],
+            correct: 1,
+            explanation: "The management for syncope is listed as 'Horizontal position with legs elevated' (supine) to increase venous return to the brain."
+        },
+        {
+            id: 15,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Male, 68 years old",
+                cc: "\"I have a tightness in my chest.\"",
+                history: "History of stable angina.",
+                findings: "Patient develops chest pain during the procedure. Conscious and responsive."
+            },
+            text: "A patient with a history of stable angina experiences chest pain during a dental procedure. The patient remains conscious. After stopping the procedure and positioning the patient, what is the first-line drug to administer?",
+            options: ["Aspirin 325 mg chewed", "Nitroglycerin (0.4 mg) sublingually", "Epinephrine IM", "Albuterol inhaler"],
+            correct: 1,
+            explanation: "The emergency management for angina includes administering 'nitroglycerin (0.3 or 0.4 mg) sublingually' as the initial pharmacological intervention."
+        },
+        {
+            id: 16,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Male, 62 years old",
+                cc: "\"I need implants.\"",
+                history: "Patient suffered a Myocardial Infarction (Heart Attack) 2 months ago.",
+                findings: "Patient is requesting elective complex surgery."
+            },
+            text: "According to the provided text, what is the recommended waiting period for elective complex dental procedures after a patient has had a Myocardial Infarction (MI)?",
+            options: ["6 weeks", "3 months", "6 months", "12 months"],
+            correct: 2,
+            explanation: "The table indicates that within the 'past 6 months' of an MI, a patient is 'At significant risk'. The text advises that 'Complex prosthetic and surgical procedures should not be undertaken' during this high-risk period."
+        },
+        {
+            id: 17,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Female, 78 years old",
+                cc: "\"I get out of breath just sitting here.\"",
+                history: "Congestive Heart Failure (CHF).",
+                findings: "Patient exhibits dyspnea at rest and swollen ankles."
+            },
+            text: "A patient with New York Heart Association (NYHA) Class IV Congestive Heart Failure (CHF) would MOST LIKELY exhibit which of the following?",
+            options: ["No limitation of physical activity", "Symptoms only with strenuous exertion", "Severe compromise of activity; inability to walk up one flight of stairs", "Symptoms only when supine"],
+            correct: 2,
+            explanation: "NYHA Class IV is described as 'Severe CHF' with 'Severe compromise of activity; cannot walk up one flight of stairs' and symptoms often present at rest."
+        },
+        {
+            id: 18,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Male, 14 years old",
+                cc: "\"I feel dizzy and hungry.\"",
+                history: "Type 1 Diabetes Mellitus. Took insulin but skipped breakfast.",
+                findings: "Patient is sweating (diaphoretic), pale, and irritable."
+            },
+            text: "Which of the following is a classic sign or symptom of hypoglycemia (low blood sugar)?",
+            options: ["Increased thirst (Polydipsia)", "Frequent urination (Polyuria)", "Sweating (Diaphoresis) and irritability", "Fruity breath odor"],
+            correct: 2,
+            explanation: "The chart for hypoglycemia lists 'Sweating,' 'Irritability,' 'Pallor,' 'Hunger,' and 'Lack of coordination'. Increased thirst and frequent urination are signs of hyperglycemia."
+        },
+        {
+            id: 19,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Female, 10 years old",
+                cc: "\"I can't breathe.\"",
+                history: "History of asthma.",
+                findings: "Audible wheezing and dyspnea during dental prophylaxis."
+            },
+            text: "A patient is having an acute asthma attack in the dental chair. They are wheezing and short of breath. What is the FIRST pharmacological intervention?",
+            options: ["Administer oxygen only", "Administer their short-acting beta-2 agonist (e.g., Albuterol) inhaler", "Inject Epinephrine IM immediately", "Administer IV corticosteroids"],
+            correct: 1,
+            explanation: "Emergency management of asthma includes allowing the patient to 'use his/her own inhaler' or using an Albuterol inhaler (Short-acting Beta-2 agonist) from the emergency kit."
+        },
+        {
+            id: 20,
+            images: { xray: null, photo: null },
+            sidebar: {
+                patient: "Female, 35 years old",
+                cc: "\"My throat feels like it's closing up.\"",
+                history: "No known allergies (previously).",
+                findings: "Minutes after taking Amoxicillin, patient develops lip swelling, difficulty breathing, and hypotension."
+            },
+            text: "What is the critical, first-line drug that must be administered immediately for a patient experiencing anaphylactic shock?",
+            options: ["Diphenhydramine (Benadryl) orally", "Albuterol inhaler", "Epinephrine (0.3 mg 1:1000) IM", "High-flow oxygen"],
+            correct: 2,
+            explanation: "The slide for anaphylactic shock highlights 'Epinephrine (0.3mg 1:1000) IM' as a primary intervention. While antihistamines and oxygen are also used, epinephrine is the definitive, life-saving treatment."
+        }
+    ];
 
-        if(!GOOGLE_SCRIPT_URL) {
-            document.getElementById('stats-loader').innerText = "Error: Google Script URL is missing.";
-            return;
-        }
+    // =========================================
+    // LOGIC VARIABLES
+    // =========================================
+    let currentQuestionIndex = 0;
+    let userScore = 0;
+    let answeredCount = 0;
+    let correctCount = 0;
+    let incorrectCount = 0;
+    let userAnswers = [];
+    let questionStartTime;
+    let timerInterval;
+    let totalTime = 30 * 60; // 30 minutes in seconds
 
-        // Fetch the data from the Google Script (using GET parameter)
-        // Agrega un cache-buster para asegurar datos frescos
-        fetch(`${GOOGLE_SCRIPT_URL}?action=getStats&v=${new Date().getTime()}`)
-            .then(response => {
-                 // Verifica si la respuesta es OK y si el content-type es JSON
-                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                 }
-                 return response.json();
-            })
-            .then(data => {
-                if (data && data.totalQuizzes !== undefined) {
-                    const total = data.totalQuizzes || 0;
-                    const correct = data.totalCorrect || 0;
-                    const answered = data.totalQuestions || 0;
-                    const incorrect = answered - correct;
-                    const percentage = answered > 0 ? Math.round((correct / answered) * 100) : 0;
+    // --- START QUIZ FUNCTION ---
+    function startQuiz() {
+        showView('quiz-view');
+        loadQuestion();
+        startTimer();
+    }
 
-                    document.getElementById('total-quizzes').innerText = total;
-                    document.getElementById('total-questions').innerText = answered;
-                    document.getElementById('total-correct').innerText = correct;
-                    document.getElementById('total-incorrect').innerText = incorrect;
-                    document.getElementById('global-percentage').innerText = percentage + "%";
+    // --- TIMER LOGIC ---
+    function startTimer() {
+        if (timerInterval) { clearInterval(timerInterval); }
+        const timerDisplay = document.getElementById('timer');
+        
+        function updateTimer() {
+            const minutes = Math.floor(totalTime / 60);
+            let seconds = totalTime % 60;
+            
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            timerDisplay.innerText = `${minutes}:${seconds}`;
+            
+            if (totalTime <= 0) {
+                clearInterval(timerInterval);
+                showResults();
+            } else {
+                totalTime--;
+            }
+        }
+        
+        updateTimer(); 
+        timerInterval = setInterval(updateTimer, 1000);
+    }
 
-                    document.getElementById('stats-loader').style.display = 'none';
-                    document.getElementById('stats-display').style.display = 'block';
-                } else {
-                    document.getElementById('stats-loader').innerText = "No data found or error fetching statistics (Server returned empty data).";
-                }
-            })
-            .catch(error => {
-                console.error("Error fetching statistics:", error);
-                document.getElementById('stats-loader').innerText = "Error fetching statistics. Check the Google Script deployment and console for CORS/network errors.";
-            });
-    }
+    function showView(viewId) {
+        document.getElementById('welcome-view').style.display = 'none';
+        document.getElementById('quiz-view').style.display = 'none';
+        document.getElementById('results-view').style.display = 'none';
+
+        const displayStyle = (viewId === 'quiz-view') ? 'flex' : 'flex';
+        const quizView = document.getElementById(viewId);
+        if (quizView) {
+            quizView.style.display = displayStyle;
+        }
+
+        const progressTextElement = document.getElementById('progress-text');
+        
+        if (viewId === 'welcome-view' || viewId === 'results-view') {
+            progressTextElement.innerHTML = 
+                (viewId === 'welcome-view') ? `Welcome <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>` :
+                `Results <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>`;
+        } else if (viewId === 'quiz-view') {
+            progressTextElement.innerHTML = `Question ${currentQuestionIndex + 1} of ${questions.length} <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>`;
+        } else {
+            progressTextElement.innerText = "Loading...";
+        }
+
+        document.getElementById('timer').style.display = (viewId === 'quiz-view') ? 'inline-block' : 'none';
+    }
+
+
+    function loadQuestion() {
+        const q = questions[currentQuestionIndex];
+        questionStartTime = new Date();
+
+        document.getElementById('progress-text').innerHTML = `Question ${currentQuestionIndex + 1} of ${questions.length} <a href="stats.html" class="btn-stats-link">📊 Global Stats</a>`;
+
+        document.getElementById('sidebar-patient').innerText = q.sidebar.patient;
+        document.getElementById('sidebar-cc').innerText = q.sidebar.cc;
+        document.getElementById('sidebar-history').innerText = q.sidebar.history;
+        document.getElementById('sidebar-findings').innerText = q.sidebar.findings;
+        
+        const btnXray = document.getElementById('btn-xray');
+        const btnPhoto = document.getElementById('btn-photo');
+
+        if (q.images && q.images.xray) {
+            btnXray.classList.remove('disabled-btn');
+            btnXray.disabled = false;
+        } else {
+            btnXray.classList.add('disabled-btn');
+            btnXray.disabled = true;
+        }
+
+        if (q.images && q.images.photo) {
+            btnPhoto.classList.remove('disabled-btn');
+            btnPhoto.disabled = false;
+        } else {
+            btnPhoto.classList.add('disabled-btn');
+            btnPhoto.disabled = true;
+        }
+
+        document.getElementById('question-text').innerText = q.text;
+        
+        const optionsContainer = document.getElementById('options-container');
+        optionsContainer.innerHTML = ''; 
+        
+        const feedbackDisplay = document.getElementById('feedbackDisplay');
+        feedbackDisplay.style.display = 'none';
+
+        q.options.forEach((optText, index) => {
+            const div = document.createElement('div');
+            div.className = 'option';
+            div.onclick = () => checkAnswer(div, index);
+            
+            const circle = document.createElement('div');
+            circle.className = 'option-circle';
+            
+            const textSpan = document.createElement('span');
+            textSpan.innerText = String.fromCharCode(65 + index) + ". " + optText; 
+
+            div.appendChild(circle);
+            div.appendChild(textSpan);
+            optionsContainer.appendChild(div);
+        });
+
+        document.getElementById('btn-next').style.display = 'none';
+    }
+
+    function checkAnswer(element, selectedIndex) {
+        if (document.querySelectorAll('.option.disabled').length > 0) return;
+
+        const endTime = new Date();
+        const timeTaken = (endTime - questionStartTime) / 1000; 
+
+        const q = questions[currentQuestionIndex];
+        const allOptions = document.querySelectorAll('.option');
+        
+        allOptions.forEach(opt => opt.classList.add('disabled'));
+
+        const isCorrect = (selectedIndex === q.correct);
+        
+        userAnswers.push({
+            questionIndex: currentQuestionIndex,
+            selected: selectedIndex,
+            isCorrect: isCorrect
+        });
+
+        answeredCount++;
+        if (isCorrect) {
+            correctCount++;
+            userScore++;
+            element.classList.add('correct-answer');
+            element.querySelector('.option-circle').innerHTML = '✓';
+        } else {
+            incorrectCount++;
+            element.classList.add('wrong-answer');
+            element.querySelector('.option-circle').innerHTML = '✕';
+            
+            const correctEl = allOptions[q.correct];
+            correctEl.classList.add('correct-answer');
+            correctEl.querySelector('.option-circle').innerHTML = '✓';
+        }
+
+        document.getElementById('score-answered').innerText = answeredCount;
+        document.getElementById('score-correct').innerText = correctCount;
+        document.getElementById('score-incorrect').innerText = incorrectCount;
+
+        const feedbackDisplay = document.getElementById('feedbackDisplay');
+        const msgText = isCorrect ? "Correct! Well done." : "Incorrect. The correct answer is " + String.fromCharCode(65 + q.correct) + ".";
+        const msgClass = isCorrect ? "success" : "error";
+        
+        feedbackDisplay.innerHTML = `${msgText} <span class="time-taken">Time spent: ${timeTaken.toFixed(1)}s</span>`;
+        feedbackDisplay.className = `feedback-message ${msgClass}`;
+        feedbackDisplay.style.display = 'block';
+
+        document.getElementById('btn-next').style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        clearInterval(timerInterval);
+        
+        showView('results-view');
+        
+        const percentage = Math.round((userScore / questions.length) * 100);
+        document.getElementById('final-score').innerText = percentage + "%";
+        document.getElementById('score-text').innerText = `You answered ${userScore} out of ${questions.length} correctly.`;
+
+        // --- CALCULATE FINAL TIME ---
+        const totalSecondsAllowed = 30 * 60;
+        const secondsSpent = totalSecondsAllowed - totalTime;
+        const m = Math.floor(secondsSpent / 60);
+        const s = secondsSpent % 60;
+        const timeString = `${m}m ${s}s`;
+        
+        // Update black box time
+        document.getElementById('final-time-value').innerText = timeString;
+
+        // --- SEND DATA TO SHEETS ---
+        sendDataToSheet(percentage, timeString);
+
+        const listContainer = document.getElementById('review-list');
+        listContainer.innerHTML = ''; 
+        
+        userAnswers.forEach((ans, i) => {
+            const q = questions[ans.questionIndex];
+            const item = document.createElement('div');
+            item.className = 'review-item';
+
+            const badgeClass = ans.isCorrect ? 'correct' : 'incorrect';
+            const badgeText = ans.isCorrect ? 'Correct' : 'Incorrect';
+
+            item.innerHTML = `
+                <div class="review-header">
+                    <span class="badge ${badgeClass}">${badgeText}</span>
+                </div>
+                <div class="review-question">${i + 1}. ${q.text}</div>
+                <div style="font-size: 0.9em; color: #555; margin-bottom: 10px;">
+                    Your Answer: <strong>${q.options[ans.selected]}</strong> <br>
+                    Correct Answer: <strong>${q.options[q.correct]}</strong>
+                </div>
+                <button class="btn-explain" onclick="toggleExplanation(${i})">Explanation</button>
+                <div class="explanation-box" id="explain-${i}">
+                    <strong>Rationale:</strong><br>
+                    ${q.explanation}
+                </div>
+            `;
+            listContainer.appendChild(item);
+        });
+
+        // Reset quiz state for next run
+        currentQuestionIndex = 0; userScore = 0; answeredCount = 0; correctCount = 0; incorrectCount = 0; userAnswers = []; totalTime = 30 * 60; 
+    }
+
+    function sendDataToSheet(percentage, formattedTime) {
+        if(!GOOGLE_SCRIPT_URL) {
+            console.warn("Google Script URL is not set.");
+            return;
+        }
+
+        const dataToSend = {
+            action: 'postResults',
+            timestamp: new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }),
+            score: percentage,
+            correct: userScore,
+            total: questions.length,
+            timeSpent: formattedTime, 
+            details: userAnswers.map(a => `Q${a.questionIndex+1}: ${a.isCorrect ? 'OK' : 'Fail'}`).join(', ')
+        };
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dataToSend)
+        }).catch(error => console.error("Error sending data:", error));
+    }
+
+    function toggleExplanation(index) {
+        const box = document.getElementById(`explain-${index}`);
+        if (box.style.display === 'block') {
+            box.style.display = 'none';
+        } else {
+            box.style.display = 'block';
+        }
+    }
+
+    // --- IMAGE HANDLING ---
+    function openImage(type) {
+        const q = questions[currentQuestionIndex];
+        if (!q.images || !q.images[type]) return;
+
+        const modal = document.getElementById('image-modal');
+        const modalImg = document.getElementById('modal-img');
+        const caption = document.getElementById('modal-caption');
+
+        modal.style.display = "flex";
+        modalImg.src = q.images[type]; 
+        caption.innerText = type === 'xray' ? "Radiographic Finding" : "Clinical Photograph";
+    }
+
+    function closeModal() {
+        document.getElementById('image-modal').style.display = "none";
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            closeModal();
+        }
+    });
+
+    window.onload = function() {
+        showView('welcome-view');
+    };
 </script>
 
 </body>
