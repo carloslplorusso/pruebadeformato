@@ -951,10 +951,12 @@
             correctEl.querySelector('.option-circle').innerText = '✓';
         }
 
+        // Update Scoreboard
         document.getElementById('score-answered').innerText = answeredCount;
         document.getElementById('score-correct').innerText = correctCount;
         document.getElementById('score-incorrect').innerText = incorrectCount;
 
+        // Feedback
         const feedbackDisplay = document.getElementById('feedbackDisplay');
         const msgText = isCorrect ? "Correct! Well done." : "Incorrect.";
         feedbackDisplay.innerHTML = `${msgText}`;
@@ -981,6 +983,7 @@
         document.getElementById('final-score').innerText = percentage + "%";
         document.getElementById('score-text').innerText = `You answered ${userScore} out of ${questions.length} correctly.`;
         
+        // Calcular tiempo
         const secondsSpent = (30 * 60) - totalTime;
         const m = Math.floor(secondsSpent / 60);
         const s = secondsSpent % 60;
@@ -989,6 +992,7 @@
         // ENVIAR A BASE DE DATOS REAL (SUPABASE)
         saveDataToSupabase(percentage, userScore, questions.length);
 
+        // Renderizar Revisión
         const listContainer = document.getElementById('review-list');
         listContainer.innerHTML = '';
         userAnswers.forEach((ans, i) => {
@@ -1011,7 +1015,7 @@
         });
     }
 
-    // --- FUNCIÓN PARA GUARDAR EN SUPABASE ---
+    // --- FUNCIÓN ASÍNCRONA PARA GUARDAR EN SUPABASE ---
     async function saveDataToSupabase(score, correct, total) {
         console.log("Enviando datos a Supabase...");
         
@@ -1029,6 +1033,7 @@
         }
     }
 
+    // Funciones auxiliares
     function toggleExplanation(index) {
         const box = document.getElementById(`explain-${index}`);
         box.style.display = (box.style.display === 'block') ? 'none' : 'block';
@@ -1048,183 +1053,6 @@
     document.addEventListener('keydown', function(event) { if (event.key === "Escape") { closeModal(); } });
 
     window.onload = function() { showView('welcome-view'); };
-</script>
-
-</body>
-</html>
-
----
-
-### 2. Archivo `stats.html` (Final Definitivo para Supabase)
-
-Este archivo **lee** los datos y muestra el dashboard.
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>INBDE Pro - Global Statistics</title>
-<style>
-    /* --- ESTILOS DEL DASHBOARD --- */
-    :root {
-        --primary-color: #fcdc11; /* Amarillo Marca */
-        --primary-dark: #121212;  /* Negro Marca */
-        --light-bg: #f3f4f6;      
-        --white: #ffffff;         
-        --border-color: #e5e7eb;  
-        --correct-text: #15803d;
-        --incorrect-text: #b91c1c;
-        --text-muted: #6b7280;
-    }
-
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        background-color: var(--light-bg);
-        color: var(--primary-dark);
-        margin: 0;
-        padding: 20px;
-        display: flex;
-        justify-content: center;
-        min-height: 100vh;
-    }
-    .quiz-wrapper {
-        display: flex;
-        flex-direction: column;
-        width: 1000px;
-        max-width: 100%;
-        background-color: var(--white);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        border-radius: 8px;
-        overflow: hidden;
-        border: 1px solid var(--border-color);
-    }
-    .brand-header {
-        background-color: var(--primary-dark);
-        color: var(--primary-color);
-        padding: 15px 20px;
-        font-weight: 800;
-        font-size: 1.2em;
-        border-bottom: 3px solid var(--primary-color);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .stats-container {
-        padding: 60px 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        flex: 1;
-        text-align: center;
-    }
-    .stats-card {
-        width: 100%;
-        max-width: 600px;
-        padding: 40px;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        background: var(--white);
-    }
-    .stats-title { font-size: 2.5em; margin-bottom: 10px; color: var(--primary-dark); }
-    .stats-subtitle { font-size: 1.1em; color: var(--text-muted); margin-bottom: 30px; }
-    .data-display { text-align: left; margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px; }
-    .data-display p { font-size: 1.2em; display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #eee; }
-    .global-percentage { margin-top: 30px; padding: 20px; background: #fffde7; border: 2px solid var(--primary-color); border-radius: 8px; display: flex; justify-content: space-between; font-size: 1.5em; font-weight: 900; }
-    .loader { min-height: 150px; display: flex; align-items: center; justify-content: center; font-style: italic; color: var(--text-muted); }
-    .btn-start { background: var(--primary-color); color: var(--primary-dark); padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: 800; font-size: 1.2em; cursor: pointer; margin-top: 30px; text-decoration: none; display: inline-block; text-align: center; box-sizing: border-box; }
-    .btn-start:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-    .btn-home-link { color: var(--primary-color); text-decoration: none; border: 1px solid var(--primary-color); padding: 5px 10px; border-radius: 4px; font-size: 0.8em; }
-    .brand-footer { padding: 15px; text-align: center; font-weight: 600; border-top: 1px solid var(--border-color); }
-</style>
-</head>
-<body onload="fetchRealStatistics()">
-
-<div class="quiz-wrapper">
-    <div class="brand-header">
-        <span>INBDE Pro</span>
-        <span>Dashboard <a href="index.html" class="btn-home-link">🏠 Home</a></span>
-    </div>
-
-    <div class="stats-container">
-        <div class="stats-card">
-            <h1 class="stats-title">Global Performance 📊</h1>
-            <p class="stats-subtitle">Real-time analytics from all users.</p>
-            
-            <div id="stats-loader" class="loader">Loading data from cloud...</div>
-            
-            <div id="stats-display" class="data-display" style="display: none;">
-                <p><span>Total Quizzes Taken:</span> <strong id="total-quizzes">0</strong></p>
-                <p><span>Questions Answered:</span> <strong id="total-questions">0</strong></p>
-                <p style="color: var(--correct-text);"><span>Total Correct Answers:</span> <strong id="total-correct">0</strong></p>
-                <p style="color: var(--incorrect-text);"><span>Total Incorrect Answers:</span> <strong id="total-incorrect">0</strong></p>
-                
-                <div class="global-percentage">
-                    <span>Global Accuracy:</span> <strong id="global-percentage">0%</strong>
-                </div>
-
-                <a href="index.html" class="btn-start">Start New Quiz</a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="brand-footer">INBDE Pro - Analytics</div>
-</div>
-
-<script src="[https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2](https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2)"></script>
-
-<script>
-    // =========================================
-    // CONFIGURACIÓN DE SUPABASE
-    // =========================================
-    const SUPABASE_URL = '[https://arumiloijqsxthlswojt.supabase.co](https://arumiloijqsxthlswojt.supabase.co)';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFydW1pbG9panFzeHRobHN3b2p0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0MzUzNTEsImV4cCI6MjA3OTAxMTM1MX0.5EaB81wglbbtNi8FOzJoDMNd_aOmMULzm27pDClJDSg';
-
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    async function fetchRealStatistics() {
-        const loader = document.getElementById('stats-loader');
-        const display = document.getElementById('stats-display');
-        
-        try {
-            // 1. Consultar la tabla 'resultados'
-            let { data: resultados, error } = await supabase
-                .from('resultados')
-                .select('*');
-
-            if (error) throw error;
-
-            // 2. Calcular estadísticas
-            if (resultados) {
-                let totalQuizzes = resultados.length;
-                let totalCorrect = 0;
-                let totalQuestions = 0;
-
-                resultados.forEach(row => {
-                    totalCorrect += (row.correct || 0);
-                    totalQuestions += (row.total || 20); // Asume 20 si no hay dato
-                });
-
-                let totalIncorrect = totalQuestions - totalCorrect;
-                let accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
-
-                // 3. Mostrar en pantalla
-                document.getElementById('total-quizzes').innerText = totalQuizzes;
-                document.getElementById('total-questions').innerText = totalQuestions;
-                document.getElementById('total-correct').innerText = totalCorrect;
-                document.getElementById('total-incorrect').innerText = totalIncorrect;
-                document.getElementById('global-percentage').innerText = accuracy + "%";
-
-                loader.style.display = 'none';
-                display.style.display = 'block';
-            }
-
-        } catch (err) {
-            console.error("Error:", err);
-            loader.innerText = "Error connecting to database. Check console.";
-        }
-    }
 </script>
 
 </body>
