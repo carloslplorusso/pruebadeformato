@@ -86,8 +86,10 @@
     }
 
     /* --- VIEWS CONFIGURATION --- */
-    #welcome-view, #results-view {
-        display: flex;
+    
+    /* IMPORTANTE: Control de visibilidad inicial */
+    #welcome-view {
+        display: flex; /* Visible al inicio */
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -97,8 +99,18 @@
     }
 
     #quiz-view {
-        display: none; /* Hidden initially */
+        display: none; /* Oculto al inicio */
         flex-direction: row;
+        flex: 1;
+    }
+
+    #results-view {
+        display: none; /* Oculto al inicio */
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        text-align: center;
         flex: 1;
     }
 
@@ -350,12 +362,26 @@
     
     .score-number { font-size: 4em; font-weight: 800; color: var(--primary-color); display: block; line-height: 1; margin: 10px 0; }
 
-    /* NEW STYLE FOR FINAL TIME */
-    .time-summary {
-        color: #ccc;
-        font-size: 1.1em;
-        margin-top: 15px;
-        font-weight: 500;
+    /* Estilo para el tiempo final dentro del cuadro negro */
+    .final-time-container {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #333;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .final-time-label {
+        color: #888;
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .final-time-value {
+        color: var(--white);
+        font-size: 1.4em;
+        font-weight: 700;
+        font-family: monospace;
     }
 
     .review-list { width: 100%; display: flex; flex-direction: column; gap: 20px; text-align: left; }
@@ -401,7 +427,7 @@
         <span class="progress-indicator header-right" id="progress-text">Welcome</span>
     </div>
 
-    <div id="welcome-view" class="centered-view">
+    <div id="welcome-view">
         <div class="welcome-card">
             <h1 class="welcome-title">INBDE Pro Method</h1>
             <p class="welcome-subtitle">Simulated Practice Examination</p>
@@ -471,12 +497,16 @@
         </div>
     </div>
 
-    <div id="results-view" class="centered-view">
+    <div id="results-view">
         <div class="score-card">
             <h2>Assessment Complete</h2>
             <span class="score-number" id="final-score">0%</span>
             <p id="score-text">You answered 0 out of 20 correctly.</p>
-            <p id="final-time" class="time-summary"></p>
+            
+            <div class="final-time-container">
+                <span class="final-time-label">Total Time Taken</span>
+                <span id="final-time-value" class="final-time-value">0m 0s</span>
+            </div>
         </div>
         
         <h3>Review Answers</h3>
@@ -499,8 +529,10 @@
     // ========================================================================
     // 1. CONFIGURATION
     // ========================================================================
+    // 👇👇👇 PEGA TU URL DE SCRIPT AQUI ABAJO 👇👇👇
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzN07vj15V3_H3K0-C4gT2X8N4_y5f9M2sQ1W8_L0p6d/exec"; 
-    
+    // 👆👆👆 --------------------------------------- 👆👆👆
+
     // =========================================
     // 2. DATABASE OF 20 QUESTIONS
     // =========================================
@@ -968,10 +1000,10 @@
         const s = secondsSpent % 60;
         const timeString = `${m}m ${s}s`;
         
-        document.getElementById('final-time').innerText = `Total Time: ${timeString}`;
+        // Update black box time
+        document.getElementById('final-time-value').innerText = timeString;
 
         // --- SEND DATA TO SHEETS ---
-        // Passing timeString directly so the sheet gets the "5m 30s" format
         sendDataToSheet(percentage, timeString);
 
         const listContainer = document.getElementById('review-list');
@@ -1013,7 +1045,7 @@
             score: percentage,
             correct: userScore,
             total: questions.length,
-            timeSpent: formattedTime, // Use calculated elapsed time
+            timeSpent: formattedTime, 
             details: userAnswers.map(a => `Q${a.questionIndex+1}: ${a.isCorrect ? 'OK' : 'Fail'}`)
         };
 
